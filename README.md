@@ -9,8 +9,6 @@
 
 > Drag-and-drop log file analyzer with auto-format detection, timeline visualization, anomaly detection, error clustering, and correlation analysis — 100% client-side, zero install, single HTML file.
 
-![Screenshot](screenshot.png)
-
 ## Why LogLens?
 
 Every sysadmin and developer deals with log files daily. Your options are: grep through them in a terminal, pay thousands for a SIEM, or upload sensitive logs to some random website. LogLens fills the gap — a professional-grade log analyzer that runs entirely in your browser with no data ever leaving your machine.
