@@ -3,217 +3,196 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LogLens v0.1.0</title>
+<title>LogLens v0.2.0</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #08090d;
-  --surface: #0f1117;
-  --surface2: #161821;
-  --surface3: #1c1f2b;
-  --border: #252838;
-  --border-hover: #353950;
-  --text: #d4d7e5;
-  --text-dim: #6b7194;
-  --text-muted: #454a66;
-  --accent: #00d4aa;
-  --accent-dim: #00a88a;
-  --accent-glow: rgba(0,212,170,0.12);
-  --red: #ff4d6a;
-  --red-dim: rgba(255,77,106,0.12);
-  --orange: #ff9f43;
-  --orange-dim: rgba(255,159,67,0.12);
-  --yellow: #ffd93d;
-  --yellow-dim: rgba(255,217,61,0.12);
-  --blue: #4da6ff;
-  --blue-dim: rgba(77,166,255,0.12);
-  --purple: #b07aff;
-  --purple-dim: rgba(176,122,255,0.12);
-  --cyan: #00d4aa;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'DM Sans', sans-serif;
-  --display: 'Bebas Neue', sans-serif;
+  --bg: #08090d; --surface: #0f1117; --surface2: #161821; --surface3: #1c1f2b;
+  --border: #252838; --border-hover: #353950;
+  --text: #d4d7e5; --text-dim: #6b7194; --text-muted: #454a66;
+  --accent: #00d4aa; --accent-dim: #00a88a; --accent-glow: rgba(0,212,170,0.12);
+  --red: #ff4d6a; --red-dim: rgba(255,77,106,0.12);
+  --orange: #ff9f43; --orange-dim: rgba(255,159,67,0.12);
+  --yellow: #ffd93d; --yellow-dim: rgba(255,217,61,0.12);
+  --blue: #4da6ff; --blue-dim: rgba(77,166,255,0.12);
+  --purple: #b07aff; --purple-dim: rgba(176,122,255,0.12);
+  --mono: 'IBM Plex Mono', monospace; --sans: 'DM Sans', sans-serif; --display: 'Bebas Neue', sans-serif;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); overflow: hidden; }
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
-::selection { background: var(--accent); color: var(--bg); }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
-@keyframes scanline { 0% { top: -2px; } 100% { top: 100%; } }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--border-hover)}
+::selection{background:var(--accent);color:var(--bg)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scanline{0%{top:-2px}100%{top:100%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+#app{display:flex;flex-direction:column;height:100vh}
 
-#app { display: flex; flex-direction: column; height: 100vh; }
+.header{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+.header h1{font-family:var(--display);font-size:26px;letter-spacing:2px;color:var(--accent);line-height:1}
+.header .version{font-family:var(--mono);font-size:10px;color:var(--text-muted)}
+.header .subtitle{font-size:12px;color:var(--text-dim);margin-left:auto}
+.header .file-info{font-family:var(--mono);font-size:11px;color:var(--text-dim);display:flex;align-items:center;gap:8px}
+.header .tag{background:var(--surface3);padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
+.header .format-badge{display:inline-flex;align-items:center;gap:4px;background:var(--accent-glow);border:1px solid var(--accent-dim);border-radius:4px;padding:2px 8px;font-family:var(--mono);font-size:10px;color:var(--accent)}
+.header .actions{display:flex;gap:4px;margin-left:8px}
+.header .act-btn{padding:4px 10px;background:var(--surface3);border:1px solid var(--border);border-radius:5px;color:var(--text-dim);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:4px}
+.header .act-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-/* Header */
-.header { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
-.header h1 { font-family: var(--display); font-size: 26px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
-.header .version { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
-.header .subtitle { font-size: 12px; color: var(--text-dim); margin-left: auto; }
-.header .file-info { font-family: var(--mono); font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 12px; }
-.header .file-info .tag { background: var(--surface3); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+.dropzone{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;border:2px dashed var(--border);border-radius:16px;margin:40px;transition:all .2s;position:relative;overflow:hidden;cursor:pointer}
+.dropzone::before{content:'';position:absolute;top:-2px;left:0;right:0;height:2px;background:var(--accent);opacity:0;animation:scanline 3s linear infinite}
+.dropzone:hover,.dropzone.dragover{border-color:var(--accent);background:var(--accent-glow)}
+.dropzone:hover::before,.dropzone.dragover::before{opacity:.6}
+.dropzone .icon{color:var(--text-muted);margin-bottom:16px}
+.dropzone h2{font-family:var(--display);font-size:32px;letter-spacing:3px;color:var(--text-dim);margin-bottom:8px}
+.dropzone p{font-size:13px;color:var(--text-muted)}
+.dropzone .formats{font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.dropzone .formats span{background:var(--surface3);padding:3px 8px;border-radius:4px}
+.dropzone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer}
 
-/* Drop zone */
-.dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; border: 2px dashed var(--border); border-radius: 16px; margin: 40px; transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer; }
-.dropzone::before { content: ''; position: absolute; top: -2px; left: 0; right: 0; height: 2px; background: var(--accent); opacity: 0; animation: scanline 3s linear infinite; }
-.dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: var(--accent-glow); }
-.dropzone:hover::before, .dropzone.dragover::before { opacity: 0.6; }
-.dropzone .icon { font-size: 48px; color: var(--text-muted); margin-bottom: 16px; }
-.dropzone h2 { font-family: var(--display); font-size: 32px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 8px; }
-.dropzone p { font-size: 13px; color: var(--text-muted); }
-.dropzone .formats { font-family: var(--mono); font-size: 10px; color: var(--text-muted); margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.dropzone .formats span { background: var(--surface3); padding: 3px 8px; border-radius: 4px; }
-.dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.toolbar{display:flex;align-items:center;gap:8px;padding:6px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);flex-wrap:wrap}
+.search-box{flex:1;max-width:350px;position:relative}
+.search-box input{width:100%;padding:5px 10px 5px 28px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color .15s}
+.search-box input:focus{border-color:var(--accent)}
+.search-box .icon{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text-muted)}
+.severity{display:flex;gap:3px}
+.sev-btn{padding:3px 8px;border:1px solid transparent;border-radius:4px;font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .12s;text-transform:uppercase;letter-spacing:.5px;background:none}
+.sev-btn.fatal,.sev-btn.error{color:var(--red);background:var(--red-dim)}.sev-btn.warn{color:var(--orange);background:var(--orange-dim)}
+.sev-btn.info{color:var(--blue);background:var(--blue-dim)}.sev-btn.debug{color:var(--purple);background:var(--purple-dim)}
+.sev-btn.other{color:var(--text-muted);background:var(--surface3)}
+.sev-btn.off{opacity:.25}.sev-btn.off:hover{opacity:.5}
+.stats-mini{margin-left:auto;display:flex;gap:14px;font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+.stats-mini .val{color:var(--text);font-weight:600}
+.brush-info{font-family:var(--mono);font-size:10px;color:var(--accent);display:flex;align-items:center;gap:6px}
+.brush-info .clear-brush{color:var(--red);cursor:pointer;text-decoration:underline}
 
-/* Main layout */
-.main { display: flex; flex: 1; overflow: hidden; }
+.content-area{display:flex;flex:1;overflow:hidden}
+.panel-left{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:1px solid var(--border)}
+.panel-right{width:330px;overflow-y:auto;flex-shrink:0;background:var(--surface)}
 
-/* Toolbar */
-.toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
-.toolbar .search-box { flex: 1; max-width: 400px; position: relative; }
-.toolbar .search-box input { width: 100%; padding: 6px 10px 6px 30px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; transition: border-color 0.15s; }
-.toolbar .search-box input:focus { border-color: var(--accent); }
-.toolbar .search-box .icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
-.toolbar .filters { display: flex; gap: 4px; }
-.toolbar .filter-btn { padding: 4px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; color: var(--text-dim); font-family: var(--mono); font-size: 10px; cursor: pointer; transition: all 0.12s; display: flex; align-items: center; gap: 4px; }
-.toolbar .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
-.toolbar .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
-.toolbar .filter-btn .count { font-size: 9px; opacity: 0.7; }
-.toolbar .severity { display: flex; gap: 3px; }
-.toolbar .sev-btn { padding: 3px 8px; border: 1px solid transparent; border-radius: 4px; font-family: var(--mono); font-size: 10px; cursor: pointer; transition: all 0.12s; text-transform: uppercase; letter-spacing: 0.5px; }
-.toolbar .sev-btn.fatal, .toolbar .sev-btn.error { color: var(--red); background: var(--red-dim); border-color: transparent; }
-.toolbar .sev-btn.warn { color: var(--orange); background: var(--orange-dim); border-color: transparent; }
-.toolbar .sev-btn.info { color: var(--blue); background: var(--blue-dim); border-color: transparent; }
-.toolbar .sev-btn.debug { color: var(--purple); background: var(--purple-dim); border-color: transparent; }
-.toolbar .sev-btn.off { opacity: 0.3; }
-.toolbar .sev-btn.off:hover { opacity: 0.6; }
-.toolbar .stats-mini { margin-left: auto; display: flex; gap: 14px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
-.toolbar .stats-mini .val { color: var(--text); font-weight: 600; }
+.timeline-wrap{padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);position:relative;user-select:none}
+.timeline-wrap .title{font-family:var(--mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.timeline-wrap .title .mode-toggle{display:flex;gap:2px;margin-left:auto}
+.mode-btn{padding:2px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;color:var(--text-muted);font-family:var(--mono);font-size:9px;cursor:pointer}
+.mode-btn.active{background:var(--accent-glow);border-color:var(--accent-dim);color:var(--accent)}
+#timelineCanvas{width:100%;height:110px;display:block;cursor:crosshair}
+.brush-overlay{position:absolute;top:28px;height:110px;background:rgba(0,212,170,0.08);border-left:1px solid var(--accent);border-right:1px solid var(--accent);pointer-events:none;display:none}
 
-/* Panels */
-.panels { display: flex; flex: 1; overflow: hidden; }
-.panel-left { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
-.panel-right { width: 340px; overflow-y: auto; flex-shrink: 0; background: var(--surface); }
+.log-container{flex:1;display:flex;overflow:hidden;position:relative}
+.log-viewer{flex:1;overflow-y:auto;font-family:var(--mono);font-size:11px;line-height:1.65;position:relative}
+.log-line{padding:1px 16px 1px 12px;display:flex;gap:8px;border-left:3px solid transparent;transition:background .06s;cursor:default;min-height:22px;align-items:flex-start}
+.log-line:hover{background:var(--surface2)}
+.log-line .ln{color:var(--text-muted);width:45px;text-align:right;flex-shrink:0;user-select:none}
+.log-line .ts{color:var(--text-dim);flex-shrink:0;min-width:150px}
+.log-line .sev{font-weight:600;flex-shrink:0;min-width:50px;text-transform:uppercase;font-size:10px;padding-top:1px}
+.log-line .msg{color:var(--text);white-space:pre-wrap;word-break:break-all;flex:1}
+.log-line .msg .highlight{background:var(--yellow);color:var(--bg);padding:0 2px;border-radius:2px}
+.log-line .fields{display:flex;gap:6px;flex-shrink:0}
+.log-line .field-tag{font-size:9px;padding:1px 5px;border-radius:3px;background:var(--surface3);color:var(--text-dim);white-space:nowrap}
+.log-line .field-tag.status-2xx{color:var(--accent)}.log-line .field-tag.status-3xx{color:var(--blue)}
+.log-line .field-tag.status-4xx{color:var(--orange)}.log-line .field-tag.status-5xx{color:var(--red)}
+.log-line.severity-fatal,.log-line.severity-error{border-left-color:var(--red)}.log-line.severity-fatal .sev,.log-line.severity-error .sev{color:var(--red)}
+.log-line.severity-warn{border-left-color:var(--orange)}.log-line.severity-warn .sev{color:var(--orange)}
+.log-line.severity-info{border-left-color:var(--blue)}.log-line.severity-info .sev{color:var(--blue)}
+.log-line.severity-debug{border-left-color:var(--purple)}.log-line.severity-debug .sev{color:var(--purple)}
+.log-line.severity-other .sev{color:var(--text-muted)}
+.log-line.anomaly{background:var(--red-dim)}
+.log-line.multiline-child{border-left-color:var(--surface3);padding-left:24px;opacity:.85}
+.log-line.multiline-child .ln,.log-line.multiline-child .ts,.log-line.multiline-child .sev{visibility:hidden}
+.log-line.bookmarked{background:rgba(255,217,61,0.06);border-right:2px solid var(--yellow)}
+.log-line .bookmark-btn{opacity:0;color:var(--text-muted);cursor:pointer;font-size:12px;flex-shrink:0;width:16px;text-align:center;transition:opacity .1s}
+.log-line:hover .bookmark-btn{opacity:.6}.log-line .bookmark-btn:hover{opacity:1;color:var(--yellow)}
+.log-line.bookmarked .bookmark-btn{opacity:1;color:var(--yellow)}
 
-/* Timeline chart */
-.timeline-wrap { padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); position: relative; }
-.timeline-wrap .title { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-.timeline-wrap .title .mode-toggle { display: flex; gap: 2px; margin-left: auto; }
-.timeline-wrap .title .mode-btn { padding: 2px 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted); font-family: var(--mono); font-size: 9px; cursor: pointer; }
-.timeline-wrap .title .mode-btn.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
-#timelineCanvas { width: 100%; height: 120px; display: block; cursor: crosshair; }
-.timeline-tooltip { position: fixed; background: var(--surface3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); pointer-events: none; z-index: 100; white-space: nowrap; display: none; }
+.minimap{width:24px;flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);position:relative;cursor:pointer}
+.minimap canvas{width:100%;height:100%;display:block}
+.minimap .viewport{position:absolute;left:0;right:0;background:rgba(0,212,170,0.12);border:1px solid var(--accent);border-left:none;border-right:none;pointer-events:none}
 
-/* Log viewer */
-.log-viewer { flex: 1; overflow-y: auto; font-family: var(--mono); font-size: 11px; line-height: 1.65; position: relative; }
-.log-line { padding: 1px 16px; display: flex; gap: 8px; border-left: 3px solid transparent; transition: background 0.08s; cursor: default; }
-.log-line:hover { background: var(--surface2); }
-.log-line .ln { color: var(--text-muted); width: 45px; text-align: right; flex-shrink: 0; user-select: none; }
-.log-line .ts { color: var(--text-dim); flex-shrink: 0; min-width: 160px; }
-.log-line .sev { font-weight: 600; flex-shrink: 0; min-width: 55px; text-transform: uppercase; font-size: 10px; padding-top: 1px; }
-.log-line .msg { color: var(--text); white-space: pre-wrap; word-break: break-all; flex: 1; }
-.log-line .msg .highlight { background: var(--yellow); color: var(--bg); padding: 0 2px; border-radius: 2px; }
-.log-line.severity-fatal, .log-line.severity-error { border-left-color: var(--red); }
-.log-line.severity-fatal .sev, .log-line.severity-error .sev { color: var(--red); }
-.log-line.severity-warn { border-left-color: var(--orange); }
-.log-line.severity-warn .sev { color: var(--orange); }
-.log-line.severity-info { border-left-color: var(--blue); }
-.log-line.severity-info .sev { color: var(--blue); }
-.log-line.severity-debug { border-left-color: var(--purple); }
-.log-line.severity-debug .sev { color: var(--purple); }
-.log-line.severity-other .sev { color: var(--text-muted); }
-.log-line.anomaly { background: var(--red-dim); }
+.rpanel-section{padding:12px 14px;border-bottom:1px solid var(--border)}
+.section-title{font-family:var(--mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.section-title .dot{width:6px;height:6px;border-radius:50%}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px}
+.stat-card .label{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.stat-card .value{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text)}
+.stat-card .sub{font-size:10px;color:var(--text-dim);margin-top:2px}
+.stat-card .sparkline{display:flex;align-items:flex-end;gap:1px;height:18px;margin-top:4px}
+.stat-card .sparkline .bar{flex:1;border-radius:1px;min-height:1px}
+.sev-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-bottom:6px;background:var(--surface2)}
+.sev-bar div{height:100%;transition:width .3s ease}
+.sev-list{display:flex;flex-direction:column;gap:3px}
+.sev-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px}
+.sev-item .dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+.sev-item .name{color:var(--text-dim);text-transform:uppercase;font-size:10px;width:45px}
+.sev-item .count{color:var(--text);font-weight:600}.sev-item .pct{color:var(--text-muted);font-size:10px;margin-left:auto}
+.hourly-heat{display:flex;gap:1px;align-items:flex-end;height:40px}
+.hourly-heat .bar{flex:1;border-radius:1px 1px 0 0;transition:height .2s;min-height:1px}
+.hourly-labels{display:flex;gap:1px;margin-top:2px}
+.hourly-labels span{flex:1;text-align:center;font-family:var(--mono);font-size:7px;color:var(--text-muted)}
+.dow-bars{display:flex;flex-direction:column;gap:2px}
+.dow-row{display:flex;align-items:center;gap:6px}
+.dow-row .day{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:28px}
+.dow-row .bar-track{flex:1;height:8px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.dow-row .bar-fill{height:100%;border-radius:3px;transition:width .3s}
+.dow-row .val{font-family:var(--mono);font-size:10px;color:var(--text-dim);width:32px;text-align:right}
 
-/* Right panel sections */
-.rpanel-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
-.rpanel-section .section-title { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-.rpanel-section .section-title .dot { width: 6px; height: 6px; border-radius: 50%; }
+.cluster-list,.anomaly-list,.correlation-list{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto}
+.cluster-item{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 8px;cursor:pointer;transition:all .12s}
+.cluster-item:hover{border-color:var(--border-hover);background:var(--surface3)}
+.cluster-item .pattern{font-family:var(--mono);font-size:10px;color:var(--text);line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
+.cluster-item .meta{display:flex;gap:6px;font-family:var(--mono);font-size:9px;color:var(--text-muted)}
+.cluster-item .meta .count-badge{color:var(--red);font-weight:600}
+.anomaly-item{background:var(--red-dim);border:1px solid rgba(255,77,106,.2);border-radius:5px;padding:6px 8px;cursor:pointer;transition:all .12s}
+.anomaly-item:hover{border-color:var(--red)}
+.anomaly-item .time{font-family:var(--mono);font-size:11px;color:var(--red);font-weight:600}
+.anomaly-item .detail{font-size:10px;color:var(--text-dim);margin-top:2px}
+.correlation-item{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 8px}
+.correlation-item .pair{font-family:var(--mono);font-size:10px;color:var(--text);margin-bottom:3px}
+.correlation-item .score{font-family:var(--mono);font-size:9px;color:var(--accent)}
 
-/* Stats grid */
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-.stat-card .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.stat-card .value { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--text); }
-.stat-card .sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.rate-change-list{display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto}
+.rate-item{background:var(--orange-dim);border:1px solid rgba(255,159,67,.2);border-radius:5px;padding:6px 8px;cursor:pointer}
+.rate-item:hover{border-color:var(--orange)}
+.rate-item .time{font-family:var(--mono);font-size:11px;color:var(--orange);font-weight:600}
+.rate-item .detail{font-size:10px;color:var(--text-dim);margin-top:2px}
 
-/* Severity breakdown */
-.sev-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 8px; background: var(--surface2); }
-.sev-bar div { height: 100%; transition: width 0.3s ease; }
-.sev-list { display: flex; flex-direction: column; gap: 4px; }
-.sev-item { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; }
-.sev-item .dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-.sev-item .name { color: var(--text-dim); text-transform: uppercase; font-size: 10px; width: 50px; }
-.sev-item .count { color: var(--text); font-weight: 600; }
-.sev-item .pct { color: var(--text-muted); font-size: 10px; margin-left: auto; }
-
-/* Error clusters */
-.cluster-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
-.cluster-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; cursor: pointer; transition: all 0.12s; }
-.cluster-item:hover { border-color: var(--border-hover); background: var(--surface3); }
-.cluster-item .pattern { font-family: var(--mono); font-size: 10px; color: var(--text); line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
-.cluster-item .meta { display: flex; gap: 8px; font-family: var(--mono); font-size: 9px; color: var(--text-muted); }
-.cluster-item .meta .count-badge { color: var(--red); font-weight: 600; }
-
-/* Anomalies */
-.anomaly-list { display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; }
-.anomaly-item { background: var(--red-dim); border: 1px solid rgba(255,77,106,0.2); border-radius: 6px; padding: 8px 10px; cursor: pointer; transition: all 0.12s; }
-.anomaly-item:hover { border-color: var(--red); }
-.anomaly-item .time { font-family: var(--mono); font-size: 11px; color: var(--red); font-weight: 600; }
-.anomaly-item .detail { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-
-/* Format detection */
-.format-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 4px; padding: 2px 8px; font-family: var(--mono); font-size: 10px; color: var(--accent); }
-
-/* Hourly heatmap */
-.hourly-heat { display: flex; gap: 2px; align-items: flex-end; height: 50px; }
-.hourly-heat .bar { flex: 1; border-radius: 2px 2px 0 0; transition: height 0.2s; position: relative; }
-.hourly-heat .bar:hover { opacity: 0.8; }
-.hourly-labels { display: flex; gap: 2px; margin-top: 2px; }
-.hourly-labels span { flex: 1; text-align: center; font-family: var(--mono); font-size: 7px; color: var(--text-muted); }
-
-/* Day-of-week distribution */
-.dow-bars { display: flex; flex-direction: column; gap: 3px; }
-.dow-row { display: flex; align-items: center; gap: 6px; }
-.dow-row .day { font-family: var(--mono); font-size: 10px; color: var(--text-dim); width: 28px; }
-.dow-row .bar-track { flex: 1; height: 10px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-.dow-row .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
-.dow-row .val { font-family: var(--mono); font-size: 10px; color: var(--text-dim); width: 35px; text-align: right; }
-
-/* Loading */
-.loading-overlay { position: absolute; inset: 0; background: rgba(8,9,13,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; }
-.loading-overlay .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-.loading-overlay .msg { font-family: var(--mono); font-size: 12px; color: var(--text-dim); margin-top: 12px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Toast */
-.toast { position: fixed; bottom: 20px; right: 20px; background: var(--surface3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-family: var(--mono); font-size: 12px; color: var(--text); z-index: 200; animation: slideUp 0.2s ease; display: none; }
-.toast.error { border-color: var(--red); color: var(--red); }
+.tooltip{position:fixed;background:var(--surface3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-family:var(--mono);font-size:11px;color:var(--text);pointer-events:none;z-index:100;white-space:nowrap;display:none;max-width:350px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-family:var(--mono);font-size:12px;color:var(--text);z-index:200;animation:slideUp .2s ease;display:none}
+.toast.success{border-color:var(--accent);color:var(--accent)}.toast.error{border-color:var(--red);color:var(--red)}
+.loading-bar{position:absolute;top:0;left:0;height:2px;background:var(--accent);transition:width .1s;z-index:50;display:none}
 </style>
 </head>
 <body>
 <div id="app">
   <div class="header">
     <h1>LOGLENS</h1>
-    <span class="version">v0.1.0</span>
+    <span class="version">v0.2.0</span>
     <div class="file-info" id="fileInfo" style="display:none"></div>
+    <div class="actions" id="headerActions" style="display:none">
+      <button class="act-btn" onclick="exportFiltered()" title="Export filtered lines">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="act-btn" onclick="exportBookmarks()" title="Export bookmarked lines">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
+        Bookmarks
+      </button>
+      <button class="act-btn" onclick="loadNewFile()" title="Load new file">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        New File
+      </button>
+    </div>
     <span class="subtitle" id="headerSubtitle">Log File Pattern Analyzer</span>
   </div>
   <div id="dropContainer">
     <div class="dropzone" id="dropzone">
-      <div class="icon">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/>
-        </svg>
-      </div>
+      <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg></div>
       <h2>DROP LOG FILE</h2>
       <p>or click to browse</p>
-      <div class="formats">
-        <span>Syslog</span><span>Apache</span><span>Nginx</span><span>IIS</span><span>JSON</span><span>CSV</span><span>Windows Event</span><span>Generic</span>
-      </div>
-      <input type="file" id="fileInput" accept=".log,.txt,.csv,.json,.evtx,.tsv">
+      <div class="formats"><span>Syslog</span><span>Apache</span><span>Nginx</span><span>IIS</span><span>JSON</span><span>CSV</span><span>Windows Event</span><span>Multiline</span><span>Generic</span></div>
+      <input type="file" id="fileInput" accept=".log,.txt,.csv,.json,.tsv,.out,.err">
     </div>
   </div>
   <div class="main" id="mainView" style="display:none">
@@ -223,11 +202,13 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
         <input type="text" id="searchInput" placeholder="Search logs... (regex supported)">
       </div>
       <div class="severity" id="severityFilters"></div>
+      <div class="brush-info" id="brushInfo" style="display:none"></div>
       <div class="stats-mini" id="statsMini"></div>
     </div>
-    <div class="panels">
+    <div class="content-area">
       <div class="panel-left">
-        <div class="timeline-wrap">
+        <div class="timeline-wrap" id="timelineWrap">
+          <div class="loading-bar" id="loadingBar"></div>
           <div class="title">
             <span>Timeline</span>
             <span id="timelineRange" style="color:var(--text-dim);font-size:9px"></span>
@@ -237,288 +218,301 @@ html, body { height: 100%; background: var(--bg); color: var(--text); font-famil
             </div>
           </div>
           <canvas id="timelineCanvas"></canvas>
+          <div class="brush-overlay" id="brushOverlay"></div>
         </div>
-        <div class="log-viewer" id="logViewer"></div>
+        <div class="log-container">
+          <div class="log-viewer" id="logViewer"></div>
+          <div class="minimap" id="minimap"><canvas id="minimapCanvas"></canvas><div class="viewport" id="minimapViewport"></div></div>
+        </div>
       </div>
       <div class="panel-right" id="panelRight"></div>
     </div>
   </div>
 </div>
-<div class="timeline-tooltip" id="timelineTooltip"></div>
+<div class="tooltip" id="tooltip"></div>
 <div class="toast" id="toast"></div>
 
 <script>
-// ============================================================
+// ═══════════════════════════════════════════
 // STATE
-// ============================================================
-let state = {
-  rawLines: [],
-  parsedLines: [],
-  filteredLines: [],
-  format: null,
-  fileName: '',
-  fileSize: 0,
-  search: '',
-  severityFilter: { fatal: true, error: true, warn: true, info: true, debug: true, other: true },
-  timelineMode: 'frequency',
-  buckets: [],
-  anomalies: [],
-  clusters: [],
-  stats: {},
+// ═══════════════════════════════════════════
+const S = {
+  rawLines:[],parsedLines:[],filteredLines:[],displayLines:[],
+  format:null,fileName:'',fileSize:0,
+  search:'',
+  sevFilter:{fatal:true,error:true,warn:true,info:true,debug:true,other:true},
+  timelineMode:'frequency',
+  buckets:[],anomalies:[],clusters:[],rateChanges:[],correlations:[],stats:{},
+  bookmarks:new Set(),
+  brush:null, // {startIdx, endIdx} bucket indices
+  scrollTop:0,viewerHeight:0,
 };
+const LINE_H = 22;
+const SEVCOLORS = {fatal:'#ff4d6a',error:'#ff4d6a',warn:'#ff9f43',info:'#4da6ff',debug:'#b07aff',other:'#454a66'};
+const DAYS_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-// ============================================================
-// FORMAT DETECTION & PARSING
-// ============================================================
-const TIMESTAMP_PATTERNS = [
-  // ISO 8601
-  { re: /(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)/, parse: s => new Date(s) },
-  // Common log format: 10/Oct/2000:13:55:36 -0700
-  { re: /(\d{2}\/\w{3}\/\d{4}:\d{2}:\d{2}:\d{2}\s[+-]\d{4})/, parse: s => {
-    const m = s.match(/(\d{2})\/(\w{3})\/(\d{4}):(\d{2}):(\d{2}):(\d{2})\s([+-]\d{4})/);
-    if(!m) return null;
-    const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-    return new Date(Date.UTC(+m[3],months[m[2]]||0,+m[1],+m[4],+m[5],+m[6]));
-  }},
-  // Syslog: Jan  5 14:22:01
-  { re: /(\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})/, parse: s => {
-    const m = s.match(/(\w{3})\s+(\d{1,2})\s+(\d{2}):(\d{2}):(\d{2})/);
-    if(!m) return null;
-    const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
-    const d = new Date(); d.setMonth(months[m[1]]||0); d.setDate(+m[2]);
-    d.setHours(+m[3],+m[4],+m[5],0); return d;
-  }},
-  // MM/DD/YYYY HH:MM:SS or DD/MM/YYYY HH:MM:SS
-  { re: /(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/, parse: s => new Date(s.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')) },
-  // YYYY/MM/DD HH:MM:SS
-  { re: /(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2})/, parse: s => new Date(s.replace(/\//g,'-')) },
-  // Unix epoch seconds
-  { re: /\b(1[4-9]\d{8})\b/, parse: s => new Date(+s * 1000) },
-  // Unix epoch milliseconds
-  { re: /\b(1[4-9]\d{11})\b/, parse: s => new Date(+s) },
-  // HH:MM:SS only (no date)
-  { re: /\b(\d{2}:\d{2}:\d{2}(?:\.\d+)?)\b/, parse: s => {
-    const m=s.match(/(\d{2}):(\d{2}):(\d{2})/);
-    if(!m) return null;
-    const d=new Date(); d.setHours(+m[1],+m[2],+m[3],0); return d;
-  }},
+// ═══════════════════════════════════════════
+// PARSING ENGINE
+// ═══════════════════════════════════════════
+const TS_PAT = [
+  {re:/(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)/,p:s=>new Date(s)},
+  {re:/(\d{2}\/\w{3}\/\d{4}:\d{2}:\d{2}:\d{2}\s[+-]\d{4})/,p:s=>{const m=s.match(/(\d{2})\/(\w{3})\/(\d{4}):(\d{2}):(\d{2}):(\d{2})\s([+-]\d{4})/);if(!m)return null;const mo={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};return new Date(Date.UTC(+m[3],mo[m[2]]||0,+m[1],+m[4],+m[5],+m[6]))}},
+  {re:/(\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})/,p:s=>{const m=s.match(/(\w{3})\s+(\d{1,2})\s+(\d{2}):(\d{2}):(\d{2})/);if(!m)return null;const mo={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};const d=new Date();d.setMonth(mo[m[1]]||0);d.setDate(+m[2]);d.setHours(+m[3],+m[4],+m[5],0);return d}},
+  {re:/(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/,p:s=>new Date(s.replace(/(\d{2})\/(\d{2})\/(\d{4})/,'$3-$1-$2'))},
+  {re:/(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2})/,p:s=>new Date(s.replace(/\//g,'-'))},
+  {re:/\b(1[4-9]\d{8})\b/,p:s=>new Date(+s*1000)},
+  {re:/\b(1[4-9]\d{11})\b/,p:s=>new Date(+s)},
+  {re:/\b(\d{2}:\d{2}:\d{2}(?:\.\d+)?)\b/,p:s=>{const m=s.match(/(\d{2}):(\d{2}):(\d{2})/);if(!m)return null;const d=new Date();d.setHours(+m[1],+m[2],+m[3],0);return d}},
+];
+const SEV_PAT = [
+  {level:'fatal',re:/\b(FATAL|CRITICAL|CRIT|EMERG|EMERGENCY|PANIC)\b/i},
+  {level:'error',re:/\b(ERROR|ERR|SEVERE|FAILURE|FAILED|ALERT)\b/i},
+  {level:'warn',re:/\b(WARN|WARNING|CAUTION)\b/i},
+  {level:'info',re:/\b(INFO|INFORMATION|NOTICE|NOTE)\b/i},
+  {level:'debug',re:/\b(DEBUG|TRACE|VERBOSE|FINE|FINER|FINEST)\b/i},
+];
+const FMT_DET = [
+  {name:'JSON Lines',test:ls=>{try{JSON.parse(ls[0]);return ls.slice(0,5).every(l=>{try{JSON.parse(l);return true}catch{return false}})}catch{return false}}},
+  {name:'Apache Combined',test:ls=>ls.slice(0,5).filter(l=>/^\S+\s+\S+\s+\S+\s+\[/.test(l)).length>=3},
+  {name:'Nginx',test:ls=>ls.slice(0,5).filter(l=>/^\d+\.\d+\.\d+\.\d+\s+-\s+-\s+\[/.test(l)).length>=3},
+  {name:'Syslog',test:ls=>ls.slice(0,5).filter(l=>/^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}/.test(l)).length>=3},
+  {name:'IIS W3C',test:ls=>ls.some(l=>l.startsWith('#Fields:'))},
+  {name:'CSV/TSV',test:ls=>{const d=ls[0]?.includes('\t')?'\t':',';const c=ls[0]?.split(d).length;return c>2&&ls.slice(1,5).every(l=>Math.abs(l.split(d).length-c)<=1)}},
+  {name:'Windows Event',test:ls=>ls.slice(0,10).filter(l=>/^(Information|Warning|Error|Critical)\s+\d/.test(l)||/EventID/i.test(l)).length>=2},
+  {name:'ISO Timestamped',test:ls=>ls.slice(0,5).filter(l=>/\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(l)).length>=3},
+  {name:'Generic',test:()=>true},
 ];
 
-const SEVERITY_PATTERNS = [
-  { level: 'fatal', re: /\b(FATAL|CRITICAL|CRIT|EMERG|EMERGENCY|PANIC)\b/i },
-  { level: 'error', re: /\b(ERROR|ERR|SEVERE|FAILURE|FAILED|ALERT)\b/i },
-  { level: 'warn',  re: /\b(WARN|WARNING|CAUTION)\b/i },
-  { level: 'info',  re: /\b(INFO|INFORMATION|NOTICE|NOTE)\b/i },
-  { level: 'debug', re: /\b(DEBUG|TRACE|VERBOSE|FINE|FINER|FINEST)\b/i },
-];
+// Apache/Nginx structured extraction
+const APACHE_RE = /^(\S+)\s+\S+\s+(\S+)\s+\[([^\]]+)\]\s+"(\w+)\s+(\S+)\s+\S+"\s+(\d{3})\s+(\d+|-)/;
+const NGINX_RE = /^(\S+)\s+-\s+(\S+)\s+\[([^\]]+)\]\s+"(\w+)\s+(\S+)\s+\S+"\s+(\d{3})\s+(\d+)/;
 
-const FORMAT_DETECTORS = [
-  { name: 'JSON Lines', test: lines => { try { JSON.parse(lines[0]); return lines.slice(0,5).every(l => { try { JSON.parse(l); return true; } catch { return false; } }); } catch { return false; } } },
-  { name: 'Apache Combined', test: lines => lines.slice(0,5).filter(l => /^\S+\s+\S+\s+\S+\s+\[/.test(l)).length >= 3 },
-  { name: 'Nginx', test: lines => lines.slice(0,5).filter(l => /^\d+\.\d+\.\d+\.\d+\s+-\s+-\s+\[/.test(l)).length >= 3 },
-  { name: 'Syslog', test: lines => lines.slice(0,5).filter(l => /^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}/.test(l)).length >= 3 },
-  { name: 'IIS W3C', test: lines => lines.some(l => l.startsWith('#Fields:')) },
-  { name: 'CSV/TSV', test: lines => { const d = lines[0]?.includes('\t') ? '\t' : ','; const cols = lines[0]?.split(d).length; return cols > 2 && lines.slice(1,5).every(l => Math.abs(l.split(d).length - cols) <= 1); } },
-  { name: 'Windows Event', test: lines => lines.slice(0,10).filter(l => /^(Information|Warning|Error|Critical)\s+\d/.test(l) || /EventID/i.test(l)).length >= 2 },
-  { name: 'ISO Timestamped', test: lines => lines.slice(0,5).filter(l => /\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(l)).length >= 3 },
-  { name: 'Generic', test: () => true },
-];
+function parseTs(line){for(const p of TS_PAT){const m=line.match(p.re);if(m){const d=p.p(m[1]);if(d&&!isNaN(d.getTime()))return d}}return null}
+function parseSev(line){for(const s of SEV_PAT)if(s.re.test(line))return s.level;return'other'}
+function detectFormat(lines){for(const f of FMT_DET)if(f.test(lines))return f.name;return'Generic'}
 
-function detectFormat(lines) {
-  for (const f of FORMAT_DETECTORS) {
-    if (f.test(lines)) return f.name;
-  }
-  return 'Generic';
+function parseJsonLine(line){
+  try{const o=JSON.parse(line);const tsK=['timestamp','time','@timestamp','date','datetime','ts','created_at'];
+  const lvK=['level','severity','loglevel','log_level','status','priority'];
+  const msgK=['message','msg','text','body','description','log','error'];
+  let ts=null,sev='other',msg=line;
+  for(const k of tsK){if(o[k]){ts=new Date(o[k]);if(!isNaN(ts))break;ts=null}}
+  for(const k of lvK){if(o[k]){const raw=String(o[k]);for(const s of SEV_PAT){if(s.re.test(raw)){sev=s.level;break}}if(sev!=='other')break}}
+  for(const k of msgK){if(o[k]){msg=String(o[k]);break}}
+  return{ts,severity:sev,message:msg,fields:o}}catch{return null}
 }
 
-function parseTimestamp(line) {
-  for (const p of TIMESTAMP_PATTERNS) {
-    const m = line.match(p.re);
-    if (m) {
-      const d = p.parse(m[1]);
-      if (d && !isNaN(d.getTime())) return d;
-    }
+function extractStructuredFields(line, format) {
+  if (format === 'Apache Combined' || format === 'Nginx') {
+    const re = format === 'Apache Combined' ? APACHE_RE : NGINX_RE;
+    const m = line.match(re);
+    if (m) return { ip: m[1], user: m[2], method: m[4], url: m[5], status: +m[6], bytes: m[7] === '-' ? 0 : +m[7] };
   }
   return null;
 }
 
-function parseSeverity(line) {
-  for (const s of SEVERITY_PATTERNS) {
-    if (s.re.test(line)) return s.level;
-  }
-  return 'other';
-}
-
-function parseJsonLine(line) {
-  try {
-    const obj = JSON.parse(line);
-    const tsKeys = ['timestamp','time','@timestamp','date','datetime','ts','created_at','logged_at'];
-    const lvlKeys = ['level','severity','loglevel','log_level','status','priority'];
-    const msgKeys = ['message','msg','text','body','description','log','error'];
-    let ts = null, sev = 'other', msg = line;
-    for (const k of tsKeys) { if (obj[k]) { ts = new Date(obj[k]); if (!isNaN(ts)) break; ts = null; } }
-    for (const k of lvlKeys) { if (obj[k]) { const raw = String(obj[k]); for (const s of SEVERITY_PATTERNS) { if (s.re.test(raw)) { sev = s.level; break; } } if (sev !== 'other') break; } }
-    for (const k of msgKeys) { if (obj[k]) { msg = String(obj[k]); break; } }
-    return { ts, severity: sev, message: msg };
-  } catch { return null; }
+// Multiline grouping — detect continuation lines (indented, stack traces, etc.)
+function isMultilineContinuation(line) {
+  if (!line.trim()) return false;
+  // Indented with spaces/tabs (stack trace pattern)
+  if (/^[\t ]{2,}/.test(line)) return true;
+  // Java: "at com.example..." or "Caused by:"
+  if (/^\s*(at |Caused by:|\.{3}\s*\d+\s*more|\.\.\.\s)/.test(line)) return true;
+  // Python: "  File ", "    "
+  if (/^\s{2,}(File |raise |Traceback)/.test(line)) return true;
+  // Lines starting with no timestamp and prior line had one
+  return false;
 }
 
 function parseLine(line, index, format) {
   if (!line.trim()) return null;
-  let ts = null, severity = 'other', message = line;
-
-  if (format === 'JSON Lines') {
-    const j = parseJsonLine(line);
-    if (j) { ts = j.ts; severity = j.severity; message = j.message; }
-  } else {
-    ts = parseTimestamp(line);
-    severity = parseSeverity(line);
-    message = line;
-  }
-
-  return { index, raw: line, ts, severity, message, isAnomaly: false };
+  let ts=null,severity='other',message=line,fields=null,structured=null;
+  if(format==='JSON Lines'){const j=parseJsonLine(line);if(j){ts=j.ts;severity=j.severity;message=j.message;fields=j.fields}}
+  else{ts=parseTs(line);severity=parseSev(line);structured=extractStructuredFields(line,format)}
+  return{index,raw:line,ts,severity,message,structured,isAnomaly:false,isChild:false,parentIdx:null};
 }
 
-// ============================================================
-// ANALYSIS
-// ============================================================
-function buildTimeBuckets(lines, numBuckets = 200) {
-  const withTs = lines.filter(l => l.ts);
-  if (withTs.length === 0) return [];
-  const minT = Math.min(...withTs.map(l => l.ts.getTime()));
-  const maxT = Math.max(...withTs.map(l => l.ts.getTime()));
-  const range = maxT - minT || 1;
-  const bucketSize = range / numBuckets;
-  const buckets = Array.from({ length: numBuckets }, (_, i) => ({
-    start: new Date(minT + i * bucketSize),
-    end: new Date(minT + (i + 1) * bucketSize),
-    total: 0, error: 0, warn: 0, info: 0, debug: 0, fatal: 0, other: 0,
-  }));
-  for (const l of withTs) {
-    const idx = Math.min(Math.floor((l.ts.getTime() - minT) / bucketSize), numBuckets - 1);
-    buckets[idx].total++;
-    buckets[idx][l.severity]++;
+function groupMultilines(lines) {
+  for (let i = 1; i < lines.length; i++) {
+    if (!lines[i].ts && isMultilineContinuation(lines[i].raw)) {
+      // Find parent (nearest preceding line with a timestamp)
+      let parent = i - 1;
+      while (parent >= 0 && lines[parent].isChild) parent = lines[parent].parentIdx;
+      if (parent >= 0) {
+        lines[i].isChild = true;
+        lines[i].parentIdx = parent;
+        lines[i].severity = lines[parent].severity;
+        lines[i].ts = lines[parent].ts;
+      }
+    }
   }
+  return lines;
+}
+
+// ═══════════════════════════════════════════
+// ANALYSIS
+// ═══════════════════════════════════════════
+function buildBuckets(lines, numBuckets=200) {
+  const withTs=lines.filter(l=>l.ts);
+  if(withTs.length===0)return[];
+  const minT=Math.min(...withTs.map(l=>l.ts.getTime()));
+  const maxT=Math.max(...withTs.map(l=>l.ts.getTime()));
+  const range=maxT-minT||1;const bSize=range/numBuckets;
+  const buckets=Array.from({length:numBuckets},(_,i)=>({
+    start:new Date(minT+i*bSize),end:new Date(minT+(i+1)*bSize),
+    total:0,error:0,warn:0,info:0,debug:0,fatal:0,other:0
+  }));
+  for(const l of withTs){const idx=Math.min(Math.floor((l.ts.getTime()-minT)/bSize),numBuckets-1);buckets[idx].total++;buckets[idx][l.severity]++}
   return buckets;
 }
 
-function detectAnomalies(buckets, threshold = 2.5) {
-  if (buckets.length < 10) return [];
-  const totals = buckets.map(b => b.total);
-  const mean = totals.reduce((a, b) => a + b, 0) / totals.length;
-  const stdDev = Math.sqrt(totals.reduce((a, b) => a + (b - mean) ** 2, 0) / totals.length) || 1;
-  const anomalies = [];
-  for (let i = 0; i < buckets.length; i++) {
-    const zScore = (buckets[i].total - mean) / stdDev;
-    if (zScore > threshold) {
-      anomalies.push({
-        bucketIdx: i,
-        bucket: buckets[i],
-        zScore,
-        magnitude: (buckets[i].total / mean).toFixed(1) + 'x above average',
-      });
-    }
+function detectAnomalies(buckets, threshold=2.5) {
+  if(buckets.length<10)return[];
+  const totals=buckets.map(b=>b.total);
+  const mean=totals.reduce((a,b)=>a+b,0)/totals.length;
+  const stdDev=Math.sqrt(totals.reduce((a,b)=>a+(b-mean)**2,0)/totals.length)||1;
+  const anomalies=[];
+  for(let i=0;i<buckets.length;i++){
+    const z=(buckets[i].total-mean)/stdDev;
+    if(z>threshold)anomalies.push({bucketIdx:i,bucket:buckets[i],zScore:z,magnitude:(buckets[i].total/mean).toFixed(1)+'x above average'});
   }
   return anomalies;
 }
 
-function clusterErrors(lines, maxClusters = 20) {
-  const errors = lines.filter(l => l.severity === 'error' || l.severity === 'fatal');
-  if (errors.length === 0) return [];
-  const normalize = msg => msg.replace(/\d+/g, 'N').replace(/0x[0-9a-fA-F]+/g, '0xN')
-    .replace(/[0-9a-f]{8,}/gi, 'HASH').replace(/\/\S+/g, '/PATH')
-    .replace(/\b\d{1,3}(\.\d{1,3}){3}\b/g, 'IP').substring(0, 120);
-  const groups = {};
-  for (const e of errors) {
-    const key = normalize(e.message);
-    if (!groups[key]) groups[key] = { pattern: e.message.substring(0, 150), normalized: key, count: 0, first: e.ts, last: e.ts, lines: [] };
-    groups[key].count++;
-    if (e.ts && (!groups[key].first || e.ts < groups[key].first)) groups[key].first = e.ts;
-    if (e.ts && (!groups[key].last || e.ts > groups[key].last)) groups[key].last = e.ts;
-    if (groups[key].lines.length < 5) groups[key].lines.push(e.index);
+function detectRateChanges(buckets, windowSize=10) {
+  if (buckets.length < windowSize * 3) return [];
+  const changes = [];
+  for (let i = windowSize; i < buckets.length - windowSize; i++) {
+    const before = buckets.slice(i - windowSize, i).reduce((s, b) => s + b.error + b.fatal, 0) / windowSize;
+    const after = buckets.slice(i, i + windowSize).reduce((s, b) => s + b.error + b.fatal, 0) / windowSize;
+    if (before > 0 && after / before >= 2.5) {
+      changes.push({ bucketIdx: i, bucket: buckets[i], rateBefore: before.toFixed(1), rateAfter: after.toFixed(1), multiplier: (after / before).toFixed(1) });
+    } else if (before === 0 && after > 2) {
+      changes.push({ bucketIdx: i, bucket: buckets[i], rateBefore: '0', rateAfter: after.toFixed(1), multiplier: 'new' });
+    }
   }
-  return Object.values(groups).sort((a, b) => b.count - a.count).slice(0, maxClusters);
+  // Deduplicate nearby
+  const deduped = [];
+  for (const c of changes) {
+    if (deduped.length === 0 || c.bucketIdx - deduped[deduped.length - 1].bucketIdx > windowSize) deduped.push(c);
+  }
+  return deduped.slice(0, 10);
+}
+
+function findCorrelations(buckets) {
+  if (buckets.length < 20) return [];
+  const sevKeys = ['error', 'warn', 'info', 'debug'];
+  const series = {};
+  for (const k of sevKeys) series[k] = buckets.map(b => b[k]);
+  const results = [];
+  for (let i = 0; i < sevKeys.length; i++) {
+    for (let j = i + 1; j < sevKeys.length; j++) {
+      const a = series[sevKeys[i]], b = series[sevKeys[j]];
+      const n = a.length;
+      const meanA = a.reduce((s, v) => s + v, 0) / n, meanB = b.reduce((s, v) => s + v, 0) / n;
+      let num = 0, denA = 0, denB = 0;
+      for (let k = 0; k < n; k++) { num += (a[k] - meanA) * (b[k] - meanB); denA += (a[k] - meanA) ** 2; denB += (b[k] - meanB) ** 2; }
+      const r = Math.sqrt(denA * denB) > 0 ? num / Math.sqrt(denA * denB) : 0;
+      if (Math.abs(r) > 0.5) results.push({ a: sevKeys[i], b: sevKeys[j], r: r.toFixed(3), strength: Math.abs(r) > 0.8 ? 'strong' : 'moderate' });
+    }
+  }
+  return results.sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
+}
+
+function clusterErrors(lines, max=20) {
+  const errors=lines.filter(l=>l.severity==='error'||l.severity==='fatal');
+  if(errors.length===0)return[];
+  const norm=msg=>msg.replace(/\d+/g,'N').replace(/0x[0-9a-fA-F]+/g,'0xN').replace(/[0-9a-f]{8,}/gi,'HASH').replace(/\/\S+/g,'/PATH').replace(/\b\d{1,3}(\.\d{1,3}){3}\b/g,'IP').substring(0,120);
+  const groups={};
+  for(const e of errors){
+    const key=norm(e.message);
+    if(!groups[key])groups[key]={pattern:e.message.substring(0,150),normalized:key,count:0,first:e.ts,last:e.ts,lines:[]};
+    groups[key].count++;
+    if(e.ts&&(!groups[key].first||e.ts<groups[key].first))groups[key].first=e.ts;
+    if(e.ts&&(!groups[key].last||e.ts>groups[key].last))groups[key].last=e.ts;
+    if(groups[key].lines.length<5)groups[key].lines.push(e.index);
+  }
+  return Object.values(groups).sort((a,b)=>b.count-a.count).slice(0,max);
 }
 
 function computeStats(lines) {
-  const total = lines.length;
-  const withTs = lines.filter(l => l.ts);
-  const sevCounts = { fatal: 0, error: 0, warn: 0, info: 0, debug: 0, other: 0 };
-  const hourly = new Array(24).fill(0);
-  const dow = new Array(7).fill(0);
-  for (const l of lines) {
-    sevCounts[l.severity]++;
-    if (l.ts) { hourly[l.ts.getHours()]++; dow[l.ts.getDay()]++; }
+  const total=lines.length;const withTs=lines.filter(l=>l.ts);
+  const sev={fatal:0,error:0,warn:0,info:0,debug:0,other:0};
+  const hourly=new Array(24).fill(0);const dow=new Array(7).fill(0);
+  for(const l of lines){sev[l.severity]++;if(l.ts){hourly[l.ts.getHours()]++;dow[l.ts.getDay()]++}}
+  let timespan='';let lps='—';
+  if(withTs.length>=2){
+    const minT=Math.min(...withTs.map(l=>l.ts.getTime()));const maxT=Math.max(...withTs.map(l=>l.ts.getTime()));
+    const diffMs=maxT-minT;const diffH=diffMs/3600000;
+    if(diffH<1)timespan=Math.round(diffMs/60000)+' min';else if(diffH<48)timespan=diffH.toFixed(1)+' hours';else timespan=(diffH/24).toFixed(1)+' days';
+    lps=(total/(diffMs/1000)).toFixed(1);
   }
-  let timespan = '';
-  if (withTs.length >= 2) {
-    const minT = Math.min(...withTs.map(l => l.ts.getTime()));
-    const maxT = Math.max(...withTs.map(l => l.ts.getTime()));
-    const diffMs = maxT - minT;
-    const diffH = diffMs / 3600000;
-    if (diffH < 1) timespan = Math.round(diffMs / 60000) + ' min';
-    else if (diffH < 48) timespan = diffH.toFixed(1) + ' hours';
-    else timespan = (diffH / 24).toFixed(1) + ' days';
-  }
-  const linesPerSec = withTs.length >= 2 ? (total / ((Math.max(...withTs.map(l=>l.ts.getTime())) - Math.min(...withTs.map(l=>l.ts.getTime()))) / 1000)).toFixed(1) : '—';
-  return { total, withTs: withTs.length, sevCounts, hourly, dow, timespan, linesPerSec, errorRate: total > 0 ? (((sevCounts.error + sevCounts.fatal) / total) * 100).toFixed(1) : '0' };
+  return{total,withTs:withTs.length,sevCounts:sev,hourly,dow,timespan,lps,errorRate:total>0?(((sev.error+sev.fatal)/total)*100).toFixed(1):'0'};
 }
 
-// ============================================================
+// ═══════════════════════════════════════════
 // RENDERING
-// ============================================================
-function formatTs(d) {
-  if (!d) return '';
-  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')
-    + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
-}
+// ═══════════════════════════════════════════
+function fmtTs(d){if(!d)return'';return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+' '+p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds())}
+function p2(n){return String(n).padStart(2,'0')}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-function highlightSearch(text, search) {
-  if (!search) return escapeHtml(text);
+function hlSearch(text, search) {
+  if (!search) return esc(text);
   try {
-    const re = new RegExp('(' + search + ')', 'gi');
-    return escapeHtml(text).replace(new RegExp('(' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<span class="highlight">$1</span>');
-  } catch { return escapeHtml(text); }
+    const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return esc(text).replace(new RegExp('(' + escaped + ')', 'gi'), '<span class="highlight">$1</span>');
+  } catch { return esc(text); }
 }
 
 function applyFilters() {
-  const search = state.search.toLowerCase();
   let searchRe = null;
-  try { if (state.search) searchRe = new RegExp(state.search, 'i'); } catch {}
+  try { if (S.search) searchRe = new RegExp(S.search, 'i'); } catch {}
+  const brushStart = S.brush ? S.buckets[S.brush.startIdx]?.start.getTime() : null;
+  const brushEnd = S.brush ? S.buckets[S.brush.endIdx]?.end.getTime() : null;
 
-  state.filteredLines = state.parsedLines.filter(l => {
-    if (!state.severityFilter[l.severity]) return false;
-    if (search) {
-      if (searchRe) return searchRe.test(l.raw);
-      return l.raw.toLowerCase().includes(search);
-    }
+  S.filteredLines = S.parsedLines.filter(l => {
+    if (!S.sevFilter[l.severity]) return false;
+    if (S.search) { if (searchRe ? !searchRe.test(l.raw) : !l.raw.toLowerCase().includes(S.search.toLowerCase())) return false; }
+    if (brushStart !== null && l.ts) { const t = l.ts.getTime(); if (t < brushStart || t > brushEnd) return false; }
     return true;
   });
+  S.displayLines = S.filteredLines;
 }
 
+// Virtual scroll renderer
 function renderLogViewer() {
   const viewer = document.getElementById('logViewer');
-  const lines = state.filteredLines;
-  // Virtual scrolling for large files
-  const lineHeight = 22;
-  const maxRender = 2000;
-  const toRender = lines.slice(0, maxRender);
+  const lines = S.displayLines;
+  const totalH = lines.length * LINE_H;
+  const scrollTop = viewer.scrollTop;
+  const viewH = viewer.clientHeight;
+  const startIdx = Math.max(0, Math.floor(scrollTop / LINE_H) - 10);
+  const endIdx = Math.min(lines.length, Math.ceil((scrollTop + viewH) / LINE_H) + 10);
 
-  let html = '';
-  for (const l of toRender) {
-    const anomalyClass = l.isAnomaly ? ' anomaly' : '';
-    html += `<div class="log-line severity-${l.severity}${anomalyClass}" data-idx="${l.index}">`;
+  let html = `<div style="height:${startIdx * LINE_H}px"></div>`;
+  for (let i = startIdx; i < endIdx; i++) {
+    const l = lines[i];
+    const isBookmarked = S.bookmarks.has(l.index);
+    const childClass = l.isChild ? ' multiline-child' : '';
+    const anomClass = l.isAnomaly ? ' anomaly' : '';
+    const bmClass = isBookmarked ? ' bookmarked' : '';
+    html += `<div class="log-line severity-${l.severity}${childClass}${anomClass}${bmClass}" data-idx="${l.index}" style="height:${LINE_H}px">`;
+    html += `<span class="bookmark-btn" onclick="event.stopPropagation();toggleBookmark(${l.index})">&#9733;</span>`;
     html += `<span class="ln">${l.index + 1}</span>`;
-    html += `<span class="ts">${formatTs(l.ts)}</span>`;
-    html += `<span class="sev">${l.severity === 'other' ? '—' : l.severity}</span>`;
-    html += `<span class="msg">${highlightSearch(l.message, state.search)}</span>`;
+    html += `<span class="ts">${fmtTs(l.ts)}</span>`;
+    html += `<span class="sev">${l.severity === 'other' ? '\u2014' : l.severity}</span>`;
+    if (l.structured) {
+      const st = l.structured;
+      const sc = st.status >= 500 ? 'status-5xx' : st.status >= 400 ? 'status-4xx' : st.status >= 300 ? 'status-3xx' : 'status-2xx';
+      html += `<span class="fields"><span class="field-tag">${esc(st.method)}</span><span class="field-tag ${sc}">${st.status}</span><span class="field-tag">${esc(st.ip)}</span></span>`;
+      html += `<span class="msg">${hlSearch(st.url || l.message, S.search)}</span>`;
+    } else {
+      html += `<span class="msg">${hlSearch(l.message, S.search)}</span>`;
+    }
     html += `</div>`;
   }
-  if (lines.length > maxRender) {
-    html += `<div style="padding:12px 16px;color:var(--text-muted);font-family:var(--mono);font-size:11px;">Showing first ${maxRender.toLocaleString()} of ${lines.length.toLocaleString()} matching lines. Use search to narrow results.</div>`;
-  }
+  html += `<div style="height:${Math.max(0, (lines.length - endIdx) * LINE_H)}px"></div>`;
   viewer.innerHTML = html;
 }
 
@@ -526,207 +520,202 @@ function renderTimeline() {
   const canvas = document.getElementById('timelineCanvas');
   const dpr = window.devicePixelRatio || 1;
   const rect = canvas.parentElement.getBoundingClientRect();
-  const w = rect.width;
-  const h = 120;
-  canvas.width = w * dpr;
-  canvas.height = h * dpr;
-  canvas.style.width = w + 'px';
-  canvas.style.height = h + 'px';
+  const w = rect.width - 32; const h = 110;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
   const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, w, h);
-
-  const buckets = state.buckets;
+  ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+  const buckets = S.buckets;
   if (buckets.length === 0) return;
-
   const maxVal = Math.max(1, ...buckets.map(b => b.total));
-  const barW = w / buckets.length;
-  const pad = 20;
-  const chartH = h - pad;
+  const barW = w / buckets.length; const pad = 18; const chartH = h - pad;
 
-  // Grid lines
-  ctx.strokeStyle = '#252838';
-  ctx.lineWidth = 0.5;
-  for (let i = 0; i < 4; i++) {
-    const y = pad + (chartH / 4) * i;
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-  }
-
-  // Bars
-  const sevColors = { fatal: '#ff4d6a', error: '#ff4d6a', warn: '#ff9f43', info: '#4da6ff', debug: '#b07aff', other: '#454a66' };
+  // Grid
+  ctx.strokeStyle = '#252838'; ctx.lineWidth = 0.5;
+  for (let i = 0; i < 4; i++) { const y = pad + (chartH / 4) * i; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
 
   for (let i = 0; i < buckets.length; i++) {
-    const b = buckets[i];
-    const x = i * barW;
-    const barH = (b.total / maxVal) * chartH;
-
-    if (state.timelineMode === 'severity') {
+    const b = buckets[i]; const x = i * barW;
+    if (S.timelineMode === 'severity') {
       let yOff = h;
       for (const sev of ['fatal','error','warn','info','debug','other']) {
         const segH = b.total > 0 ? (b[sev] / maxVal) * chartH : 0;
-        if (segH > 0) {
-          ctx.fillStyle = sevColors[sev];
-          ctx.globalAlpha = 0.85;
-          ctx.fillRect(x + 0.5, yOff - segH, Math.max(barW - 1, 1), segH);
-          yOff -= segH;
-        }
+        if (segH > 0) { ctx.fillStyle = SEVCOLORS[sev]; ctx.globalAlpha = 0.85; ctx.fillRect(x + .5, yOff - segH, Math.max(barW - .5, 1), segH); yOff -= segH; }
       }
       ctx.globalAlpha = 1;
     } else {
-      // Check if anomaly bucket
-      const isAnomaly = state.anomalies.some(a => a.bucketIdx === i);
-      ctx.fillStyle = isAnomaly ? '#ff4d6a' : '#00d4aa';
-      ctx.globalAlpha = isAnomaly ? 0.9 : 0.6;
-      ctx.fillRect(x + 0.5, h - barH, Math.max(barW - 1, 1), barH);
+      const barH = (b.total / maxVal) * chartH;
+      const isAnom = S.anomalies.some(a => a.bucketIdx === i);
+      const isRate = S.rateChanges.some(r => r.bucketIdx === i);
+      ctx.fillStyle = isAnom ? '#ff4d6a' : isRate ? '#ff9f43' : '#00d4aa';
+      ctx.globalAlpha = isAnom ? 0.9 : isRate ? 0.8 : 0.55;
+      ctx.fillRect(x + .5, h - barH, Math.max(barW - .5, 1), barH);
       ctx.globalAlpha = 1;
     }
   }
 
-  // Anomaly markers
-  for (const a of state.anomalies) {
-    const x = a.bucketIdx * barW + barW / 2;
-    ctx.fillStyle = '#ff4d6a';
-    ctx.beginPath();
-    ctx.arc(x, 10, 3, 0, Math.PI * 2);
-    ctx.fill();
+  // Anomaly dots
+  for (const a of S.anomalies) { const x = a.bucketIdx * barW + barW / 2; ctx.fillStyle = '#ff4d6a'; ctx.beginPath(); ctx.arc(x, 8, 3, 0, Math.PI * 2); ctx.fill(); }
+  // Rate change markers
+  for (const r of S.rateChanges) { const x = r.bucketIdx * barW + barW / 2; ctx.fillStyle = '#ff9f43'; ctx.beginPath(); ctx.moveTo(x, 4); ctx.lineTo(x - 3, 10); ctx.lineTo(x + 3, 10); ctx.closePath(); ctx.fill(); }
+
+  // Brush highlight
+  if (S.brush) {
+    const bx = S.brush.startIdx * barW; const bw = (S.brush.endIdx - S.brush.startIdx + 1) * barW;
+    ctx.fillStyle = 'rgba(0,212,170,0.08)'; ctx.fillRect(bx, 0, bw, h);
+    ctx.strokeStyle = '#00d4aa'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(bx, 0); ctx.lineTo(bx, h); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx + bw, 0); ctx.lineTo(bx + bw, h); ctx.stroke();
   }
 
   // Time labels
-  ctx.fillStyle = '#454a66';
-  ctx.font = '9px IBM Plex Mono';
-  const labelCount = Math.min(6, buckets.length);
-  for (let i = 0; i < labelCount; i++) {
-    const idx = Math.floor(i * (buckets.length - 1) / (labelCount - 1));
-    const b = buckets[idx];
-    const x = idx * barW;
-    const label = formatTs(b.start).substring(5, 16);
-    ctx.fillText(label, x, h - 2);
-  }
+  ctx.fillStyle = '#454a66'; ctx.font = '9px IBM Plex Mono';
+  const lc = Math.min(6, buckets.length);
+  for (let i = 0; i < lc; i++) { const idx = Math.floor(i * (buckets.length - 1) / (lc - 1)); const b = buckets[idx]; ctx.fillText(fmtTs(b.start).substring(5, 16), idx * barW, h - 2); }
 
-  // Update range label
   const rangeEl = document.getElementById('timelineRange');
-  if (buckets.length > 0) {
-    rangeEl.textContent = formatTs(buckets[0].start) + '  →  ' + formatTs(buckets[buckets.length-1].end);
+  if (buckets.length > 0) rangeEl.textContent = fmtTs(buckets[0].start) + '  \u2192  ' + fmtTs(buckets[buckets.length - 1].end);
+}
+
+function renderMinimap() {
+  const container = document.getElementById('minimap');
+  const canvas = document.getElementById('minimapCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const h = container.clientHeight; const w = 24;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
+
+  const lines = S.displayLines;
+  if (lines.length === 0) return;
+  const rowH = Math.max(0.5, h / lines.length);
+
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    const y = (i / lines.length) * h;
+    if (l.severity === 'error' || l.severity === 'fatal') { ctx.fillStyle = '#ff4d6a'; ctx.globalAlpha = 0.8; }
+    else if (l.severity === 'warn') { ctx.fillStyle = '#ff9f43'; ctx.globalAlpha = 0.5; }
+    else if (l.isAnomaly) { ctx.fillStyle = '#ff4d6a'; ctx.globalAlpha = 0.4; }
+    else { ctx.fillStyle = '#252838'; ctx.globalAlpha = 0.4; }
+    ctx.fillRect(0, y, w, Math.max(rowH, 1));
   }
+  ctx.globalAlpha = 1;
+  updateMinimapViewport();
+}
+
+function updateMinimapViewport() {
+  const viewer = document.getElementById('logViewer');
+  const vp = document.getElementById('minimapViewport');
+  const container = document.getElementById('minimap');
+  if (!container.clientHeight || S.displayLines.length === 0) return;
+  const totalH = S.displayLines.length * LINE_H;
+  const viewH = viewer.clientHeight;
+  const scrollTop = viewer.scrollTop;
+  const pct = scrollTop / totalH;
+  const viewPct = viewH / totalH;
+  vp.style.top = (pct * container.clientHeight) + 'px';
+  vp.style.height = Math.max(8, viewPct * container.clientHeight) + 'px';
 }
 
 function renderRightPanel() {
   const panel = document.getElementById('panelRight');
-  const s = state.stats;
-  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const sevColors = { fatal: 'var(--red)', error: 'var(--red)', warn: 'var(--orange)', info: 'var(--blue)', debug: 'var(--purple)', other: 'var(--text-muted)' };
-
+  const s = S.stats;
   let html = '';
 
-  // File & Format
-  html += `<div class="rpanel-section">
-    <div class="section-title"><div class="dot" style="background:var(--accent)"></div>Overview</div>
+  // Overview
+  html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--accent)"></div>Overview</div>
     <div class="stats-grid">
       <div class="stat-card"><div class="label">Total Lines</div><div class="value">${s.total.toLocaleString()}</div></div>
-      <div class="stat-card"><div class="label">Timestamped</div><div class="value">${s.withTs.toLocaleString()}</div><div class="sub">${s.total > 0 ? ((s.withTs/s.total)*100).toFixed(0) : 0}% parsed</div></div>
-      <div class="stat-card"><div class="label">Timespan</div><div class="value">${s.timespan || '—'}</div></div>
-      <div class="stat-card"><div class="label">Lines/sec</div><div class="value">${s.linesPerSec}</div></div>
-      <div class="stat-card"><div class="label">Error Rate</div><div class="value" style="color:${parseFloat(s.errorRate) > 5 ? 'var(--red)' : 'var(--text)'}">${s.errorRate}%</div></div>
-      <div class="stat-card"><div class="label">Format</div><div class="value" style="font-size:12px">${state.format}</div></div>
-    </div>
-  </div>`;
+      <div class="stat-card"><div class="label">Timestamped</div><div class="value">${s.withTs.toLocaleString()}</div><div class="sub">${s.total>0?((s.withTs/s.total)*100).toFixed(0):0}% parsed</div></div>
+      <div class="stat-card"><div class="label">Timespan</div><div class="value">${s.timespan||'\u2014'}</div></div>
+      <div class="stat-card"><div class="label">Lines/sec</div><div class="value">${s.lps}</div></div>
+      <div class="stat-card"><div class="label">Error Rate</div><div class="value" style="color:${parseFloat(s.errorRate)>5?'var(--red)':'var(--text)'}">${s.errorRate}%</div>
+        <div class="sparkline">${buildSparkline(S.buckets.map(b=>b.error+b.fatal),'var(--red)')}</div></div>
+      <div class="stat-card"><div class="label">Format</div><div class="value" style="font-size:11px">${S.format}</div></div>
+    </div></div>`;
 
-  // Severity breakdown
-  const totalSev = Object.values(s.sevCounts).reduce((a,b) => a+b, 0) || 1;
-  html += `<div class="rpanel-section">
-    <div class="section-title"><div class="dot" style="background:var(--orange)"></div>Severity</div>
-    <div class="sev-bar">`;
-  for (const sev of ['fatal','error','warn','info','debug','other']) {
-    const pct = (s.sevCounts[sev] / totalSev) * 100;
-    if (pct > 0) html += `<div style="width:${pct}%;background:${sevColors[sev]}"></div>`;
-  }
+  // Severity
+  const totalSev = Object.values(s.sevCounts).reduce((a, b) => a + b, 0) || 1;
+  html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--orange)"></div>Severity</div><div class="sev-bar">`;
+  for (const sev of ['fatal','error','warn','info','debug','other']) { const pct = (s.sevCounts[sev] / totalSev) * 100; if (pct > 0) html += `<div style="width:${pct}%;background:${SEVCOLORS[sev]}"></div>`; }
   html += `</div><div class="sev-list">`;
-  for (const sev of ['fatal','error','warn','info','debug','other']) {
-    if (s.sevCounts[sev] > 0) {
-      html += `<div class="sev-item"><div class="dot" style="background:${sevColors[sev]}"></div><div class="name">${sev}</div><div class="count">${s.sevCounts[sev].toLocaleString()}</div><div class="pct">${((s.sevCounts[sev]/totalSev)*100).toFixed(1)}%</div></div>`;
-    }
-  }
+  for (const sev of ['fatal','error','warn','info','debug','other']) { if (s.sevCounts[sev] > 0) html += `<div class="sev-item"><div class="dot" style="background:${SEVCOLORS[sev]}"></div><div class="name">${sev}</div><div class="count">${s.sevCounts[sev].toLocaleString()}</div><div class="pct">${((s.sevCounts[sev]/totalSev)*100).toFixed(1)}%</div></div>`; }
   html += `</div></div>`;
 
-  // Hourly heatmap
-  const maxHourly = Math.max(1, ...s.hourly);
-  html += `<div class="rpanel-section">
-    <div class="section-title"><div class="dot" style="background:var(--blue)"></div>Hourly Distribution</div>
-    <div class="hourly-heat">`;
-  for (let h = 0; h < 24; h++) {
-    const intensity = s.hourly[h] / maxHourly;
-    const height = Math.max(2, intensity * 48);
-    const color = intensity > 0.7 ? 'var(--red)' : intensity > 0.4 ? 'var(--orange)' : 'var(--accent)';
-    html += `<div class="bar" style="height:${height}px;background:${color};opacity:${Math.max(0.2,intensity)}" title="${String(h).padStart(2,'0')}:00 — ${s.hourly[h].toLocaleString()} lines"></div>`;
-  }
+  // Hourly
+  const maxH = Math.max(1, ...s.hourly);
+  html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--blue)"></div>Hourly Distribution</div><div class="hourly-heat">`;
+  for (let h = 0; h < 24; h++) { const int = s.hourly[h] / maxH; const ht = Math.max(1, int * 38); const col = int > .7 ? 'var(--red)' : int > .4 ? 'var(--orange)' : 'var(--accent)'; html += `<div class="bar" style="height:${ht}px;background:${col};opacity:${Math.max(.15,int)}" title="${p2(h)}:00 \u2014 ${s.hourly[h].toLocaleString()}"></div>`; }
   html += `</div><div class="hourly-labels">`;
-  for (let h = 0; h < 24; h++) {
-    html += h % 3 === 0 ? `<span>${String(h).padStart(2,'0')}</span>` : `<span></span>`;
-  }
-  html += `</div></div>`;
+  for (let h = 0; h < 24; h++) html += h % 3 === 0 ? `<span>${p2(h)}</span>` : '<span></span>';
+  html += '</div></div>';
 
   // Day of week
-  const maxDow = Math.max(1, ...s.dow);
-  html += `<div class="rpanel-section">
-    <div class="section-title"><div class="dot" style="background:var(--purple)"></div>Day of Week</div>
-    <div class="dow-bars">`;
-  for (let d = 0; d < 7; d++) {
-    const pct = (s.dow[d] / maxDow) * 100;
-    html += `<div class="dow-row"><div class="day">${DAYS[d]}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div><div class="val">${s.dow[d].toLocaleString()}</div></div>`;
+  const maxD = Math.max(1, ...s.dow);
+  html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--purple)"></div>Day of Week</div><div class="dow-bars">`;
+  for (let d = 0; d < 7; d++) html += `<div class="dow-row"><div class="day">${DAYS_S[d]}</div><div class="bar-track"><div class="bar-fill" style="width:${(s.dow[d]/maxD)*100}%;background:var(--accent)"></div></div><div class="val">${s.dow[d].toLocaleString()}</div></div>`;
+  html += '</div></div>';
+
+  // Rate Changes
+  if (S.rateChanges.length > 0) {
+    html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--orange)"></div>Error Rate Spikes <span style="color:var(--orange);font-weight:600;margin-left:auto">${S.rateChanges.length}</span></div><div class="rate-change-list">`;
+    for (const r of S.rateChanges) html += `<div class="rate-item" onclick="scrollToTime('${r.bucket.start.toISOString()}')"><div class="time">${fmtTs(r.bucket.start)}</div><div class="detail">Error rate: ${r.rateBefore}/bucket \u2192 ${r.rateAfter}/bucket (${r.multiplier}x)</div></div>`;
+    html += '</div></div>';
   }
-  html += `</div></div>`;
 
   // Anomalies
-  if (state.anomalies.length > 0) {
-    html += `<div class="rpanel-section">
-      <div class="section-title"><div class="dot" style="background:var(--red)"></div>Anomaly Spikes <span style="color:var(--red);font-weight:600;margin-left:auto">${state.anomalies.length}</span></div>
-      <div class="anomaly-list">`;
-    for (const a of state.anomalies) {
-      html += `<div class="anomaly-item" onclick="scrollToTime('${a.bucket.start.toISOString()}')">
-        <div class="time">${formatTs(a.bucket.start)}</div>
-        <div class="detail">${a.bucket.total} events — ${a.magnitude}</div>
-      </div>`;
-    }
-    html += `</div></div>`;
+  if (S.anomalies.length > 0) {
+    html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--red)"></div>Anomaly Spikes <span style="color:var(--red);font-weight:600;margin-left:auto">${S.anomalies.length}</span></div><div class="anomaly-list">`;
+    for (const a of S.anomalies) html += `<div class="anomaly-item" onclick="scrollToTime('${a.bucket.start.toISOString()}')"><div class="time">${fmtTs(a.bucket.start)}</div><div class="detail">${a.bucket.total} events \u2014 ${a.magnitude}</div></div>`;
+    html += '</div></div>';
   }
 
-  // Error clusters
-  if (state.clusters.length > 0) {
-    html += `<div class="rpanel-section">
-      <div class="section-title"><div class="dot" style="background:var(--red)"></div>Error Clusters <span style="color:var(--red);font-weight:600;margin-left:auto">${state.clusters.length}</span></div>
-      <div class="cluster-list">`;
-    for (const c of state.clusters) {
-      html += `<div class="cluster-item" onclick="filterByCluster('${escapeHtml(c.normalized.substring(0,60)).replace(/'/g,"\\'")}')"  title="Click to filter">
-        <div class="pattern">${escapeHtml(c.pattern)}</div>
-        <div class="meta"><span class="count-badge">${c.count}x</span>
-        ${c.first ? `<span>${formatTs(c.first).substring(5,16)}</span>` : ''}
-        ${c.last && c.first !== c.last ? `<span>→ ${formatTs(c.last).substring(5,16)}</span>` : ''}
-        </div>
-      </div>`;
+  // Correlations
+  if (S.correlations.length > 0) {
+    html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--cyan)"></div>Correlations</div><div class="correlation-list">`;
+    for (const c of S.correlations) html += `<div class="correlation-item"><div class="pair">${c.a.toUpperCase()} \u2194 ${c.b.toUpperCase()}</div><div class="score">r=${c.r} (${c.strength}${+c.r > 0 ? ' positive' : ' negative'})</div></div>`;
+    html += '</div></div>';
+  }
+
+  // Clusters
+  if (S.clusters.length > 0) {
+    html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--red)"></div>Error Clusters <span style="color:var(--red);font-weight:600;margin-left:auto">${S.clusters.length}</span></div><div class="cluster-list">`;
+    for (const c of S.clusters) {
+      const normSafe = esc(c.normalized.substring(0, 60)).replace(/'/g, "\\'");
+      html += `<div class="cluster-item" onclick="filterByCluster('${normSafe}')"><div class="pattern">${esc(c.pattern)}</div><div class="meta"><span class="count-badge">${c.count}x</span>${c.first ? `<span>${fmtTs(c.first).substring(5, 16)}</span>` : ''}${c.last && c.first !== c.last ? `<span>\u2192 ${fmtTs(c.last).substring(5, 16)}</span>` : ''}</div></div>`;
     }
-    html += `</div></div>`;
+    html += '</div></div>';
   }
 
   panel.innerHTML = html;
 }
 
-function renderSeverityButtons() {
-  const container = document.getElementById('severityFilters');
-  const s = state.stats;
+function buildSparkline(data, color) {
+  if (!data || data.length === 0) return '';
+  const max = Math.max(1, ...data);
+  // Sample down to ~20 bars
+  const step = Math.max(1, Math.floor(data.length / 20));
   let html = '';
-  for (const sev of ['fatal','error','warn','info','debug','other']) {
-    if (s.sevCounts[sev] > 0) {
-      const active = state.severityFilter[sev];
-      html += `<button class="sev-btn ${sev}${active ? '' : ' off'}" onclick="toggleSeverity('${sev}')">${sev} <span class="count">${s.sevCounts[sev].toLocaleString()}</span></button>`;
-    }
+  for (let i = 0; i < data.length; i += step) {
+    const chunk = data.slice(i, i + step);
+    const val = chunk.reduce((a, b) => a + b, 0) / chunk.length;
+    const h = Math.max(1, (val / max) * 16);
+    html += `<div class="bar" style="height:${h}px;background:${color};opacity:${Math.max(0.2, val / max)}"></div>`;
   }
-  container.innerHTML = html;
+  return html;
+}
+
+function renderSevButtons() {
+  const el = document.getElementById('severityFilters');
+  const s = S.stats; let html = '';
+  for (const sev of ['fatal','error','warn','info','debug','other']) {
+    if (s.sevCounts[sev] > 0) html += `<button class="sev-btn ${sev}${S.sevFilter[sev] ? '' : ' off'}" onclick="toggleSev('${sev}')">${sev} ${s.sevCounts[sev].toLocaleString()}</button>`;
+  }
+  el.innerHTML = html;
 }
 
 function renderStatsMini() {
-  const el = document.getElementById('statsMini');
-  const f = state.filteredLines;
-  el.innerHTML = `<span>Showing <span class="val">${f.length.toLocaleString()}</span> of ${state.parsedLines.length.toLocaleString()}</span>`;
+  document.getElementById('statsMini').innerHTML = `<span>Showing <span class="val">${S.displayLines.length.toLocaleString()}</span> / ${S.parsedLines.length.toLocaleString()}</span>`;
 }
 
 function renderAll() {
@@ -734,181 +723,211 @@ function renderAll() {
   renderLogViewer();
   renderTimeline();
   renderRightPanel();
-  renderSeverityButtons();
+  renderSevButtons();
   renderStatsMini();
+  setTimeout(renderMinimap, 50);
 }
 
-// ============================================================
+// ═══════════════════════════════════════════
 // INTERACTIONS
-// ============================================================
-function toggleSeverity(sev) {
-  state.severityFilter[sev] = !state.severityFilter[sev];
-  applyFilters();
-  renderLogViewer();
-  renderSeverityButtons();
-  renderStatsMini();
-}
+// ═══════════════════════════════════════════
+function toggleSev(sev) { S.sevFilter[sev] = !S.sevFilter[sev]; applyFilters(); renderLogViewer(); renderSevButtons(); renderStatsMini(); renderMinimap(); }
+function setTimelineMode(mode) { S.timelineMode = mode; document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode)); renderTimeline(); }
 
-function setTimelineMode(mode) {
-  state.timelineMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-  renderTimeline();
+function toggleBookmark(idx) {
+  if (S.bookmarks.has(idx)) S.bookmarks.delete(idx); else S.bookmarks.add(idx);
+  renderLogViewer();
 }
 
 function scrollToTime(isoStr) {
   const target = new Date(isoStr).getTime();
   const viewer = document.getElementById('logViewer');
-  const lines = state.filteredLines;
+  const lines = S.displayLines;
   let closest = 0, minDiff = Infinity;
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].ts) {
-      const diff = Math.abs(lines[i].ts.getTime() - target);
-      if (diff < minDiff) { minDiff = diff; closest = i; }
-    }
-  }
-  const el = viewer.children[closest];
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    el.style.background = 'var(--accent-glow)';
-    setTimeout(() => el.style.background = '', 2000);
-  }
+  for (let i = 0; i < lines.length; i++) { if (lines[i].ts) { const diff = Math.abs(lines[i].ts.getTime() - target); if (diff < minDiff) { minDiff = diff; closest = i; } } }
+  viewer.scrollTop = closest * LINE_H - viewer.clientHeight / 2;
+  renderLogViewer();
+  // Flash highlight
+  setTimeout(() => {
+    const el = viewer.querySelector(`[data-idx="${lines[closest]?.index}"]`);
+    if (el) { el.style.background = 'var(--accent-glow)'; setTimeout(() => el.style.background = '', 1500); }
+  }, 50);
 }
 
 function filterByCluster(normalized) {
-  // Find original text from cluster
-  const cluster = state.clusters.find(c => c.normalized.substring(0, 60) === normalized);
+  const cluster = S.clusters.find(c => esc(c.normalized.substring(0, 60)).replace(/'/g, "\\'") === normalized);
   if (cluster && cluster.lines.length > 0) {
-    const line = state.parsedLines[cluster.lines[0]];
+    const line = S.parsedLines[cluster.lines[0]];
     if (line) {
       const words = line.message.split(/\s+/).filter(w => w.length > 4 && !/^\d+$/.test(w)).slice(0, 3);
-      if (words.length > 0) {
-        document.getElementById('searchInput').value = words.join('.*');
-        state.search = words.join('.*');
-        applyFilters();
-        renderLogViewer();
-        renderStatsMini();
-      }
+      if (words.length > 0) { document.getElementById('searchInput').value = words[0]; S.search = words[0]; applyFilters(); renderLogViewer(); renderStatsMini(); renderMinimap(); }
     }
   }
 }
 
-// Timeline tooltip
-const canvas = document.getElementById('timelineCanvas');
-const tooltip = document.getElementById('timelineTooltip');
-canvas.addEventListener('mousemove', e => {
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const idx = Math.floor((x / rect.width) * state.buckets.length);
-  if (idx >= 0 && idx < state.buckets.length) {
-    const b = state.buckets[idx];
-    tooltip.style.display = 'block';
-    tooltip.style.left = (e.clientX + 12) + 'px';
-    tooltip.style.top = (e.clientY - 8) + 'px';
-    tooltip.innerHTML = `<div style="color:var(--accent)">${formatTs(b.start)}</div>
-      <div>${b.total} events</div>
-      ${b.error + b.fatal > 0 ? `<div style="color:var(--red)">${b.error + b.fatal} errors</div>` : ''}
-      ${b.warn > 0 ? `<div style="color:var(--orange)">${b.warn} warnings</div>` : ''}`;
-  }
+function exportFiltered() {
+  const text = S.filteredLines.map(l => l.raw).join('\n');
+  downloadText(text, S.fileName.replace(/\.[^.]+$/, '') + '_filtered.log');
+  showToast('Exported ' + S.filteredLines.length.toLocaleString() + ' lines', 'success');
+}
+
+function exportBookmarks() {
+  if (S.bookmarks.size === 0) { showToast('No bookmarked lines', 'error'); return; }
+  const text = S.parsedLines.filter(l => S.bookmarks.has(l.index)).map(l => l.raw).join('\n');
+  downloadText(text, S.fileName.replace(/\.[^.]+$/, '') + '_bookmarks.log');
+  showToast('Exported ' + S.bookmarks.size + ' bookmarked lines', 'success');
+}
+
+function downloadText(text, filename) {
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+}
+
+function loadNewFile() { document.getElementById('fileInput2')?.click() || document.getElementById('fileInput').click(); }
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type; t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2500);
+}
+
+// Timeline brush selection
+let brushing = false, brushStartX = 0;
+const tCanvas = document.getElementById('timelineCanvas');
+tCanvas.addEventListener('mousedown', e => {
+  if (e.shiftKey || e.button === 0) { brushing = true; brushStartX = e.offsetX; S.brush = null; }
 });
-canvas.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
-canvas.addEventListener('click', e => {
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const idx = Math.floor((x / rect.width) * state.buckets.length);
-  if (idx >= 0 && idx < state.buckets.length) {
-    scrollToTime(state.buckets[idx].start.toISOString());
+tCanvas.addEventListener('mousemove', e => {
+  if (!brushing) {
+    // Tooltip
+    const tip = document.getElementById('tooltip');
+    const rect = tCanvas.getBoundingClientRect();
+    const idx = Math.floor((e.offsetX / rect.width) * S.buckets.length);
+    if (idx >= 0 && idx < S.buckets.length) {
+      const b = S.buckets[idx];
+      tip.style.display = 'block'; tip.style.left = (e.clientX + 12) + 'px'; tip.style.top = (e.clientY - 8) + 'px';
+      tip.innerHTML = `<div style="color:var(--accent)">${fmtTs(b.start)}</div><div>${b.total} events</div>${b.error + b.fatal > 0 ? `<div style="color:var(--red)">${b.error + b.fatal} errors</div>` : ''}${b.warn > 0 ? `<div style="color:var(--orange)">${b.warn} warnings</div>` : ''}`;
+    }
+    return;
   }
+  const rect = tCanvas.getBoundingClientRect();
+  const x = e.offsetX;
+  const startIdx = Math.floor((Math.min(brushStartX, x) / rect.width) * S.buckets.length);
+  const endIdx = Math.floor((Math.max(brushStartX, x) / rect.width) * S.buckets.length);
+  S.brush = { startIdx: Math.max(0, startIdx), endIdx: Math.min(S.buckets.length - 1, endIdx) };
+  renderTimeline();
+});
+tCanvas.addEventListener('mouseup', () => {
+  if (brushing && S.brush && S.brush.endIdx - S.brush.startIdx >= 1) {
+    brushing = false;
+    const bs = S.buckets[S.brush.startIdx], be = S.buckets[S.brush.endIdx];
+    document.getElementById('brushInfo').style.display = 'flex';
+    document.getElementById('brushInfo').innerHTML = `<span>Brush: ${fmtTs(bs.start).substring(5,16)} \u2192 ${fmtTs(be.end).substring(5,16)}</span><span class="clear-brush" onclick="clearBrush()">clear</span>`;
+    applyFilters(); renderLogViewer(); renderStatsMini(); renderMinimap();
+  } else { brushing = false; }
+});
+tCanvas.addEventListener('mouseleave', () => { document.getElementById('tooltip').style.display = 'none'; if (brushing) brushing = false; });
+tCanvas.addEventListener('dblclick', () => clearBrush());
+
+function clearBrush() {
+  S.brush = null;
+  document.getElementById('brushInfo').style.display = 'none';
+  applyFilters(); renderLogViewer(); renderTimeline(); renderStatsMini(); renderMinimap();
+}
+
+// Virtual scroll on log viewer
+const logViewer = document.getElementById('logViewer');
+logViewer.addEventListener('scroll', () => { renderLogViewer(); updateMinimapViewport(); });
+
+// Minimap click to scroll
+document.getElementById('minimap').addEventListener('click', e => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientY - rect.top) / rect.height;
+  logViewer.scrollTop = pct * S.displayLines.length * LINE_H - logViewer.clientHeight / 2;
 });
 
 // Search
 let searchTimeout;
 document.getElementById('searchInput').addEventListener('input', e => {
   clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    state.search = e.target.value;
-    applyFilters();
-    renderLogViewer();
-    renderStatsMini();
-  }, 200);
+  searchTimeout = setTimeout(() => { S.search = e.target.value; applyFilters(); renderLogViewer(); renderStatsMini(); renderMinimap(); }, 150);
 });
 
-// ============================================================
+// ═══════════════════════════════════════════
 // FILE LOADING
-// ============================================================
+// ═══════════════════════════════════════════
 function processFile(file) {
-  state.fileName = file.name;
-  state.fileSize = file.size;
+  S.fileName = file.name; S.fileSize = file.size;
+  S.bookmarks = new Set(); S.brush = null; S.search = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('brushInfo').style.display = 'none';
+
+  const loadBar = document.getElementById('loadingBar');
+  loadBar.style.display = 'block'; loadBar.style.width = '10%';
 
   const reader = new FileReader();
+  reader.onprogress = e => { if (e.lengthComputable) loadBar.style.width = ((e.loaded / e.total) * 50) + '%'; };
   reader.onload = function(e) {
+    loadBar.style.width = '60%';
     const text = e.target.result;
     const rawLines = text.split(/\r?\n/);
-    state.rawLines = rawLines;
-    state.format = detectFormat(rawLines);
+    S.rawLines = rawLines;
+    S.format = detectFormat(rawLines);
+    loadBar.style.width = '70%';
 
-    // Parse lines (chunked for large files)
-    state.parsedLines = [];
+    S.parsedLines = [];
     for (let i = 0; i < rawLines.length; i++) {
-      const parsed = parseLine(rawLines[i], i, state.format);
-      if (parsed) state.parsedLines.push(parsed);
+      const parsed = parseLine(rawLines[i], i, S.format);
+      if (parsed) S.parsedLines.push(parsed);
     }
+    loadBar.style.width = '80%';
+
+    // Multiline grouping
+    groupMultilines(S.parsedLines);
 
     // Analysis
-    state.stats = computeStats(state.parsedLines);
-    state.buckets = buildTimeBuckets(state.parsedLines);
-    state.anomalies = detectAnomalies(state.buckets);
-    state.clusters = clusterErrors(state.parsedLines);
+    S.stats = computeStats(S.parsedLines);
+    S.buckets = buildBuckets(S.parsedLines);
+    S.anomalies = detectAnomalies(S.buckets);
+    S.rateChanges = detectRateChanges(S.buckets);
+    S.correlations = findCorrelations(S.buckets);
+    S.clusters = clusterErrors(S.parsedLines);
+    loadBar.style.width = '90%';
 
     // Mark anomaly lines
-    for (const a of state.anomalies) {
-      for (const l of state.parsedLines) {
+    for (const a of S.anomalies) {
+      for (const l of S.parsedLines) {
         if (l.ts && l.ts >= a.bucket.start && l.ts < a.bucket.end) l.isAnomaly = true;
       }
     }
 
-    // Update UI
+    // Show UI
     document.getElementById('dropContainer').style.display = 'none';
     document.getElementById('mainView').style.display = 'flex';
     document.getElementById('headerSubtitle').style.display = 'none';
+    document.getElementById('headerActions').style.display = 'flex';
 
     const fileInfo = document.getElementById('fileInfo');
     fileInfo.style.display = 'flex';
     const sizeStr = file.size > 1048576 ? (file.size / 1048576).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
-    fileInfo.innerHTML = `<span class="tag">${escapeHtml(file.name)}</span><span class="tag">${sizeStr}</span><span class="tag">${state.parsedLines.length.toLocaleString()} lines</span><span class="format-badge">${state.format}</span>`;
+    fileInfo.innerHTML = `<span class="tag">${esc(file.name)}</span><span class="tag">${sizeStr}</span><span class="tag">${S.parsedLines.length.toLocaleString()} lines</span><span class="format-badge">${S.format}</span>`;
+
+    loadBar.style.width = '100%';
+    setTimeout(() => { loadBar.style.display = 'none'; loadBar.style.width = '0'; }, 300);
 
     renderAll();
-
-    // Resize handler
-    window.addEventListener('resize', () => { renderTimeline(); });
+    window.addEventListener('resize', () => { renderTimeline(); renderMinimap(); });
   };
   reader.readAsText(file);
 }
 
-// Drag and drop
+// Drag & drop
 const dropzone = document.getElementById('dropzone');
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
-dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('dragover'); });
-dropzone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropzone.classList.remove('dragover');
-  if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]);
-});
-document.getElementById('fileInput').addEventListener('change', e => {
-  if (e.target.files.length > 0) processFile(e.target.files[0]);
-});
-
-// Also allow dropping on the whole page when viewing logs
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]); });
+document.getElementById('fileInput').addEventListener('change', e => { if (e.target.files.length > 0) processFile(e.target.files[0]); });
 document.addEventListener('dragover', e => e.preventDefault());
-document.addEventListener('drop', e => {
-  e.preventDefault();
-  if (e.dataTransfer.files.length > 0) {
-    // Reset state
-    state.search = '';
-    state.severityFilter = { fatal: true, error: true, warn: true, info: true, debug: true, other: true };
-    document.getElementById('searchInput').value = '';
-    processFile(e.dataTransfer.files[0]);
-  }
-});
+document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]); });
 </script>
 </body>
 </html>
