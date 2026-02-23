@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LogLens v0.1.0</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #08090d;
+  --surface: #0f1117;
+  --surface2: #161821;
+  --surface3: #1c1f2b;
+  --border: #252838;
+  --border-hover: #353950;
+  --text: #d4d7e5;
+  --text-dim: #6b7194;
+  --text-muted: #454a66;
+  --accent: #00d4aa;
+  --accent-dim: #00a88a;
+  --accent-glow: rgba(0,212,170,0.12);
+  --red: #ff4d6a;
+  --red-dim: rgba(255,77,106,0.12);
+  --orange: #ff9f43;
+  --orange-dim: rgba(255,159,67,0.12);
+  --yellow: #ffd93d;
+  --yellow-dim: rgba(255,217,61,0.12);
+  --blue: #4da6ff;
+  --blue-dim: rgba(77,166,255,0.12);
+  --purple: #b07aff;
+  --purple-dim: rgba(176,122,255,0.12);
+  --cyan: #00d4aa;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --display: 'Bebas Neue', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); overflow: hidden; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+::selection { background: var(--accent); color: var(--bg); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+@keyframes scanline { 0% { top: -2px; } 100% { top: 100%; } }
+
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* Header */
+.header { display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
+.header h1 { font-family: var(--display); font-size: 26px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+.header .version { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
+.header .subtitle { font-size: 12px; color: var(--text-dim); margin-left: auto; }
+.header .file-info { font-family: var(--mono); font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 12px; }
+.header .file-info .tag { background: var(--surface3); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border); }
+
+/* Drop zone */
+.dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; border: 2px dashed var(--border); border-radius: 16px; margin: 40px; transition: all 0.2s; position: relative; overflow: hidden; cursor: pointer; }
+.dropzone::before { content: ''; position: absolute; top: -2px; left: 0; right: 0; height: 2px; background: var(--accent); opacity: 0; animation: scanline 3s linear infinite; }
+.dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: var(--accent-glow); }
+.dropzone:hover::before, .dropzone.dragover::before { opacity: 0.6; }
+.dropzone .icon { font-size: 48px; color: var(--text-muted); margin-bottom: 16px; }
+.dropzone h2 { font-family: var(--display); font-size: 32px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 8px; }
+.dropzone p { font-size: 13px; color: var(--text-muted); }
+.dropzone .formats { font-family: var(--mono); font-size: 10px; color: var(--text-muted); margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.dropzone .formats span { background: var(--surface3); padding: 3px 8px; border-radius: 4px; }
+.dropzone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+/* Main layout */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* Toolbar */
+.toolbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); }
+.toolbar .search-box { flex: 1; max-width: 400px; position: relative; }
+.toolbar .search-box input { width: 100%; padding: 6px 10px 6px 30px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 12px; outline: none; transition: border-color 0.15s; }
+.toolbar .search-box input:focus { border-color: var(--accent); }
+.toolbar .search-box .icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+.toolbar .filters { display: flex; gap: 4px; }
+.toolbar .filter-btn { padding: 4px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; color: var(--text-dim); font-family: var(--mono); font-size: 10px; cursor: pointer; transition: all 0.12s; display: flex; align-items: center; gap: 4px; }
+.toolbar .filter-btn:hover { border-color: var(--border-hover); color: var(--text); }
+.toolbar .filter-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.toolbar .filter-btn .count { font-size: 9px; opacity: 0.7; }
+.toolbar .severity { display: flex; gap: 3px; }
+.toolbar .sev-btn { padding: 3px 8px; border: 1px solid transparent; border-radius: 4px; font-family: var(--mono); font-size: 10px; cursor: pointer; transition: all 0.12s; text-transform: uppercase; letter-spacing: 0.5px; }
+.toolbar .sev-btn.fatal, .toolbar .sev-btn.error { color: var(--red); background: var(--red-dim); border-color: transparent; }
+.toolbar .sev-btn.warn { color: var(--orange); background: var(--orange-dim); border-color: transparent; }
+.toolbar .sev-btn.info { color: var(--blue); background: var(--blue-dim); border-color: transparent; }
+.toolbar .sev-btn.debug { color: var(--purple); background: var(--purple-dim); border-color: transparent; }
+.toolbar .sev-btn.off { opacity: 0.3; }
+.toolbar .sev-btn.off:hover { opacity: 0.6; }
+.toolbar .stats-mini { margin-left: auto; display: flex; gap: 14px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+.toolbar .stats-mini .val { color: var(--text); font-weight: 600; }
+
+/* Panels */
+.panels { display: flex; flex: 1; overflow: hidden; }
+.panel-left { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--border); }
+.panel-right { width: 340px; overflow-y: auto; flex-shrink: 0; background: var(--surface); }
+
+/* Timeline chart */
+.timeline-wrap { padding: 12px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--surface); position: relative; }
+.timeline-wrap .title { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.timeline-wrap .title .mode-toggle { display: flex; gap: 2px; margin-left: auto; }
+.timeline-wrap .title .mode-btn { padding: 2px 8px; background: var(--surface2); border: 1px solid var(--border); border-radius: 3px; color: var(--text-muted); font-family: var(--mono); font-size: 9px; cursor: pointer; }
+.timeline-wrap .title .mode-btn.active { background: var(--accent-glow); border-color: var(--accent-dim); color: var(--accent); }
+#timelineCanvas { width: 100%; height: 120px; display: block; cursor: crosshair; }
+.timeline-tooltip { position: fixed; background: var(--surface3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-family: var(--mono); font-size: 11px; color: var(--text); pointer-events: none; z-index: 100; white-space: nowrap; display: none; }
+
+/* Log viewer */
+.log-viewer { flex: 1; overflow-y: auto; font-family: var(--mono); font-size: 11px; line-height: 1.65; position: relative; }
+.log-line { padding: 1px 16px; display: flex; gap: 8px; border-left: 3px solid transparent; transition: background 0.08s; cursor: default; }
+.log-line:hover { background: var(--surface2); }
+.log-line .ln { color: var(--text-muted); width: 45px; text-align: right; flex-shrink: 0; user-select: none; }
+.log-line .ts { color: var(--text-dim); flex-shrink: 0; min-width: 160px; }
+.log-line .sev { font-weight: 600; flex-shrink: 0; min-width: 55px; text-transform: uppercase; font-size: 10px; padding-top: 1px; }
+.log-line .msg { color: var(--text); white-space: pre-wrap; word-break: break-all; flex: 1; }
+.log-line .msg .highlight { background: var(--yellow); color: var(--bg); padding: 0 2px; border-radius: 2px; }
+.log-line.severity-fatal, .log-line.severity-error { border-left-color: var(--red); }
+.log-line.severity-fatal .sev, .log-line.severity-error .sev { color: var(--red); }
+.log-line.severity-warn { border-left-color: var(--orange); }
+.log-line.severity-warn .sev { color: var(--orange); }
+.log-line.severity-info { border-left-color: var(--blue); }
+.log-line.severity-info .sev { color: var(--blue); }
+.log-line.severity-debug { border-left-color: var(--purple); }
+.log-line.severity-debug .sev { color: var(--purple); }
+.log-line.severity-other .sev { color: var(--text-muted); }
+.log-line.anomaly { background: var(--red-dim); }
+
+/* Right panel sections */
+.rpanel-section { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.rpanel-section .section-title { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.rpanel-section .section-title .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* Stats grid */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.stat-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.stat-card .label { font-size: 9px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.stat-card .value { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--text); }
+.stat-card .sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* Severity breakdown */
+.sev-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 8px; background: var(--surface2); }
+.sev-bar div { height: 100%; transition: width 0.3s ease; }
+.sev-list { display: flex; flex-direction: column; gap: 4px; }
+.sev-item { display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 11px; }
+.sev-item .dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.sev-item .name { color: var(--text-dim); text-transform: uppercase; font-size: 10px; width: 50px; }
+.sev-item .count { color: var(--text); font-weight: 600; }
+.sev-item .pct { color: var(--text-muted); font-size: 10px; margin-left: auto; }
+
+/* Error clusters */
+.cluster-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+.cluster-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; cursor: pointer; transition: all 0.12s; }
+.cluster-item:hover { border-color: var(--border-hover); background: var(--surface3); }
+.cluster-item .pattern { font-family: var(--mono); font-size: 10px; color: var(--text); line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
+.cluster-item .meta { display: flex; gap: 8px; font-family: var(--mono); font-size: 9px; color: var(--text-muted); }
+.cluster-item .meta .count-badge { color: var(--red); font-weight: 600; }
+
+/* Anomalies */
+.anomaly-list { display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; }
+.anomaly-item { background: var(--red-dim); border: 1px solid rgba(255,77,106,0.2); border-radius: 6px; padding: 8px 10px; cursor: pointer; transition: all 0.12s; }
+.anomaly-item:hover { border-color: var(--red); }
+.anomaly-item .time { font-family: var(--mono); font-size: 11px; color: var(--red); font-weight: 600; }
+.anomaly-item .detail { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+
+/* Format detection */
+.format-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-glow); border: 1px solid var(--accent-dim); border-radius: 4px; padding: 2px 8px; font-family: var(--mono); font-size: 10px; color: var(--accent); }
+
+/* Hourly heatmap */
+.hourly-heat { display: flex; gap: 2px; align-items: flex-end; height: 50px; }
+.hourly-heat .bar { flex: 1; border-radius: 2px 2px 0 0; transition: height 0.2s; position: relative; }
+.hourly-heat .bar:hover { opacity: 0.8; }
+.hourly-labels { display: flex; gap: 2px; margin-top: 2px; }
+.hourly-labels span { flex: 1; text-align: center; font-family: var(--mono); font-size: 7px; color: var(--text-muted); }
+
+/* Day-of-week distribution */
+.dow-bars { display: flex; flex-direction: column; gap: 3px; }
+.dow-row { display: flex; align-items: center; gap: 6px; }
+.dow-row .day { font-family: var(--mono); font-size: 10px; color: var(--text-dim); width: 28px; }
+.dow-row .bar-track { flex: 1; height: 10px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.dow-row .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.dow-row .val { font-family: var(--mono); font-size: 10px; color: var(--text-dim); width: 35px; text-align: right; }
+
+/* Loading */
+.loading-overlay { position: absolute; inset: 0; background: rgba(8,9,13,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 50; }
+.loading-overlay .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.loading-overlay .msg { font-family: var(--mono); font-size: 12px; color: var(--text-dim); margin-top: 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toast */
+.toast { position: fixed; bottom: 20px; right: 20px; background: var(--surface3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-family: var(--mono); font-size: 12px; color: var(--text); z-index: 200; animation: slideUp 0.2s ease; display: none; }
+.toast.error { border-color: var(--red); color: var(--red); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <h1>LOGLENS</h1>
+    <span class="version">v0.1.0</span>
+    <div class="file-info" id="fileInfo" style="display:none"></div>
+    <span class="subtitle" id="headerSubtitle">Log File Pattern Analyzer</span>
+  </div>
+  <div id="dropContainer">
+    <div class="dropzone" id="dropzone">
+      <div class="icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/>
+        </svg>
+      </div>
+      <h2>DROP LOG FILE</h2>
+      <p>or click to browse</p>
+      <div class="formats">
+        <span>Syslog</span><span>Apache</span><span>Nginx</span><span>IIS</span><span>JSON</span><span>CSV</span><span>Windows Event</span><span>Generic</span>
+      </div>
+      <input type="file" id="fileInput" accept=".log,.txt,.csv,.json,.evtx,.tsv">
+    </div>
+  </div>
+  <div class="main" id="mainView" style="display:none">
+    <div class="toolbar" id="toolbar">
+      <div class="search-box">
+        <span class="icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" id="searchInput" placeholder="Search logs... (regex supported)">
+      </div>
+      <div class="severity" id="severityFilters"></div>
+      <div class="stats-mini" id="statsMini"></div>
+    </div>
+    <div class="panels">
+      <div class="panel-left">
+        <div class="timeline-wrap">
+          <div class="title">
+            <span>Timeline</span>
+            <span id="timelineRange" style="color:var(--text-dim);font-size:9px"></span>
+            <div class="mode-toggle">
+              <button class="mode-btn active" data-mode="frequency" onclick="setTimelineMode('frequency')">Freq</button>
+              <button class="mode-btn" data-mode="severity" onclick="setTimelineMode('severity')">Severity</button>
+            </div>
+          </div>
+          <canvas id="timelineCanvas"></canvas>
+        </div>
+        <div class="log-viewer" id="logViewer"></div>
+      </div>
+      <div class="panel-right" id="panelRight"></div>
+    </div>
+  </div>
+</div>
+<div class="timeline-tooltip" id="timelineTooltip"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  rawLines: [],
+  parsedLines: [],
+  filteredLines: [],
+  format: null,
+  fileName: '',
+  fileSize: 0,
+  search: '',
+  severityFilter: { fatal: true, error: true, warn: true, info: true, debug: true, other: true },
+  timelineMode: 'frequency',
+  buckets: [],
+  anomalies: [],
+  clusters: [],
+  stats: {},
+};
+
+// ============================================================
+// FORMAT DETECTION & PARSING
+// ============================================================
+const TIMESTAMP_PATTERNS = [
+  // ISO 8601
+  { re: /(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)/, parse: s => new Date(s) },
+  // Common log format: 10/Oct/2000:13:55:36 -0700
+  { re: /(\d{2}\/\w{3}\/\d{4}:\d{2}:\d{2}:\d{2}\s[+-]\d{4})/, parse: s => {
+    const m = s.match(/(\d{2})\/(\w{3})\/(\d{4}):(\d{2}):(\d{2}):(\d{2})\s([+-]\d{4})/);
+    if(!m) return null;
+    const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    return new Date(Date.UTC(+m[3],months[m[2]]||0,+m[1],+m[4],+m[5],+m[6]));
+  }},
+  // Syslog: Jan  5 14:22:01
+  { re: /(\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})/, parse: s => {
+    const m = s.match(/(\w{3})\s+(\d{1,2})\s+(\d{2}):(\d{2}):(\d{2})/);
+    if(!m) return null;
+    const months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+    const d = new Date(); d.setMonth(months[m[1]]||0); d.setDate(+m[2]);
+    d.setHours(+m[3],+m[4],+m[5],0); return d;
+  }},
+  // MM/DD/YYYY HH:MM:SS or DD/MM/YYYY HH:MM:SS
+  { re: /(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/, parse: s => new Date(s.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$1-$2')) },
+  // YYYY/MM/DD HH:MM:SS
+  { re: /(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2})/, parse: s => new Date(s.replace(/\//g,'-')) },
+  // Unix epoch seconds
+  { re: /\b(1[4-9]\d{8})\b/, parse: s => new Date(+s * 1000) },
+  // Unix epoch milliseconds
+  { re: /\b(1[4-9]\d{11})\b/, parse: s => new Date(+s) },
+  // HH:MM:SS only (no date)
+  { re: /\b(\d{2}:\d{2}:\d{2}(?:\.\d+)?)\b/, parse: s => {
+    const m=s.match(/(\d{2}):(\d{2}):(\d{2})/);
+    if(!m) return null;
+    const d=new Date(); d.setHours(+m[1],+m[2],+m[3],0); return d;
+  }},
+];
+
+const SEVERITY_PATTERNS = [
+  { level: 'fatal', re: /\b(FATAL|CRITICAL|CRIT|EMERG|EMERGENCY|PANIC)\b/i },
+  { level: 'error', re: /\b(ERROR|ERR|SEVERE|FAILURE|FAILED|ALERT)\b/i },
+  { level: 'warn',  re: /\b(WARN|WARNING|CAUTION)\b/i },
+  { level: 'info',  re: /\b(INFO|INFORMATION|NOTICE|NOTE)\b/i },
+  { level: 'debug', re: /\b(DEBUG|TRACE|VERBOSE|FINE|FINER|FINEST)\b/i },
+];
+
+const FORMAT_DETECTORS = [
+  { name: 'JSON Lines', test: lines => { try { JSON.parse(lines[0]); return lines.slice(0,5).every(l => { try { JSON.parse(l); return true; } catch { return false; } }); } catch { return false; } } },
+  { name: 'Apache Combined', test: lines => lines.slice(0,5).filter(l => /^\S+\s+\S+\s+\S+\s+\[/.test(l)).length >= 3 },
+  { name: 'Nginx', test: lines => lines.slice(0,5).filter(l => /^\d+\.\d+\.\d+\.\d+\s+-\s+-\s+\[/.test(l)).length >= 3 },
+  { name: 'Syslog', test: lines => lines.slice(0,5).filter(l => /^\w{3}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}/.test(l)).length >= 3 },
+  { name: 'IIS W3C', test: lines => lines.some(l => l.startsWith('#Fields:')) },
+  { name: 'CSV/TSV', test: lines => { const d = lines[0]?.includes('\t') ? '\t' : ','; const cols = lines[0]?.split(d).length; return cols > 2 && lines.slice(1,5).every(l => Math.abs(l.split(d).length - cols) <= 1); } },
+  { name: 'Windows Event', test: lines => lines.slice(0,10).filter(l => /^(Information|Warning|Error|Critical)\s+\d/.test(l) || /EventID/i.test(l)).length >= 2 },
+  { name: 'ISO Timestamped', test: lines => lines.slice(0,5).filter(l => /\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(l)).length >= 3 },
+  { name: 'Generic', test: () => true },
+];
+
+function detectFormat(lines) {
+  for (const f of FORMAT_DETECTORS) {
+    if (f.test(lines)) return f.name;
+  }
+  return 'Generic';
+}
+
+function parseTimestamp(line) {
+  for (const p of TIMESTAMP_PATTERNS) {
+    const m = line.match(p.re);
+    if (m) {
+      const d = p.parse(m[1]);
+      if (d && !isNaN(d.getTime())) return d;
+    }
+  }
+  return null;
+}
+
+function parseSeverity(line) {
+  for (const s of SEVERITY_PATTERNS) {
+    if (s.re.test(line)) return s.level;
+  }
+  return 'other';
+}
+
+function parseJsonLine(line) {
+  try {
+    const obj = JSON.parse(line);
+    const tsKeys = ['timestamp','time','@timestamp','date','datetime','ts','created_at','logged_at'];
+    const lvlKeys = ['level','severity','loglevel','log_level','status','priority'];
+    const msgKeys = ['message','msg','text','body','description','log','error'];
+    let ts = null, sev = 'other', msg = line;
+    for (const k of tsKeys) { if (obj[k]) { ts = new Date(obj[k]); if (!isNaN(ts)) break; ts = null; } }
+    for (const k of lvlKeys) { if (obj[k]) { const raw = String(obj[k]); for (const s of SEVERITY_PATTERNS) { if (s.re.test(raw)) { sev = s.level; break; } } if (sev !== 'other') break; } }
+    for (const k of msgKeys) { if (obj[k]) { msg = String(obj[k]); break; } }
+    return { ts, severity: sev, message: msg };
+  } catch { return null; }
+}
+
+function parseLine(line, index, format) {
+  if (!line.trim()) return null;
+  let ts = null, severity = 'other', message = line;
+
+  if (format === 'JSON Lines') {
+    const j = parseJsonLine(line);
+    if (j) { ts = j.ts; severity = j.severity; message = j.message; }
+  } else {
+    ts = parseTimestamp(line);
+    severity = parseSeverity(line);
+    message = line;
+  }
+
+  return { index, raw: line, ts, severity, message, isAnomaly: false };
+}
+
+// ============================================================
+// ANALYSIS
+// ============================================================
+function buildTimeBuckets(lines, numBuckets = 200) {
+  const withTs = lines.filter(l => l.ts);
+  if (withTs.length === 0) return [];
+  const minT = Math.min(...withTs.map(l => l.ts.getTime()));
+  const maxT = Math.max(...withTs.map(l => l.ts.getTime()));
+  const range = maxT - minT || 1;
+  const bucketSize = range / numBuckets;
+  const buckets = Array.from({ length: numBuckets }, (_, i) => ({
+    start: new Date(minT + i * bucketSize),
+    end: new Date(minT + (i + 1) * bucketSize),
+    total: 0, error: 0, warn: 0, info: 0, debug: 0, fatal: 0, other: 0,
+  }));
+  for (const l of withTs) {
+    const idx = Math.min(Math.floor((l.ts.getTime() - minT) / bucketSize), numBuckets - 1);
+    buckets[idx].total++;
+    buckets[idx][l.severity]++;
+  }
+  return buckets;
+}
+
+function detectAnomalies(buckets, threshold = 2.5) {
+  if (buckets.length < 10) return [];
+  const totals = buckets.map(b => b.total);
+  const mean = totals.reduce((a, b) => a + b, 0) / totals.length;
+  const stdDev = Math.sqrt(totals.reduce((a, b) => a + (b - mean) ** 2, 0) / totals.length) || 1;
+  const anomalies = [];
+  for (let i = 0; i < buckets.length; i++) {
+    const zScore = (buckets[i].total - mean) / stdDev;
+    if (zScore > threshold) {
+      anomalies.push({
+        bucketIdx: i,
+        bucket: buckets[i],
+        zScore,
+        magnitude: (buckets[i].total / mean).toFixed(1) + 'x above average',
+      });
+    }
+  }
+  return anomalies;
+}
+
+function clusterErrors(lines, maxClusters = 20) {
+  const errors = lines.filter(l => l.severity === 'error' || l.severity === 'fatal');
+  if (errors.length === 0) return [];
+  const normalize = msg => msg.replace(/\d+/g, 'N').replace(/0x[0-9a-fA-F]+/g, '0xN')
+    .replace(/[0-9a-f]{8,}/gi, 'HASH').replace(/\/\S+/g, '/PATH')
+    .replace(/\b\d{1,3}(\.\d{1,3}){3}\b/g, 'IP').substring(0, 120);
+  const groups = {};
+  for (const e of errors) {
+    const key = normalize(e.message);
+    if (!groups[key]) groups[key] = { pattern: e.message.substring(0, 150), normalized: key, count: 0, first: e.ts, last: e.ts, lines: [] };
+    groups[key].count++;
+    if (e.ts && (!groups[key].first || e.ts < groups[key].first)) groups[key].first = e.ts;
+    if (e.ts && (!groups[key].last || e.ts > groups[key].last)) groups[key].last = e.ts;
+    if (groups[key].lines.length < 5) groups[key].lines.push(e.index);
+  }
+  return Object.values(groups).sort((a, b) => b.count - a.count).slice(0, maxClusters);
+}
+
+function computeStats(lines) {
+  const total = lines.length;
+  const withTs = lines.filter(l => l.ts);
+  const sevCounts = { fatal: 0, error: 0, warn: 0, info: 0, debug: 0, other: 0 };
+  const hourly = new Array(24).fill(0);
+  const dow = new Array(7).fill(0);
+  for (const l of lines) {
+    sevCounts[l.severity]++;
+    if (l.ts) { hourly[l.ts.getHours()]++; dow[l.ts.getDay()]++; }
+  }
+  let timespan = '';
+  if (withTs.length >= 2) {
+    const minT = Math.min(...withTs.map(l => l.ts.getTime()));
+    const maxT = Math.max(...withTs.map(l => l.ts.getTime()));
+    const diffMs = maxT - minT;
+    const diffH = diffMs / 3600000;
+    if (diffH < 1) timespan = Math.round(diffMs / 60000) + ' min';
+    else if (diffH < 48) timespan = diffH.toFixed(1) + ' hours';
+    else timespan = (diffH / 24).toFixed(1) + ' days';
+  }
+  const linesPerSec = withTs.length >= 2 ? (total / ((Math.max(...withTs.map(l=>l.ts.getTime())) - Math.min(...withTs.map(l=>l.ts.getTime()))) / 1000)).toFixed(1) : '—';
+  return { total, withTs: withTs.length, sevCounts, hourly, dow, timespan, linesPerSec, errorRate: total > 0 ? (((sevCounts.error + sevCounts.fatal) / total) * 100).toFixed(1) : '0' };
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+function formatTs(d) {
+  if (!d) return '';
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0')
+    + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+}
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function highlightSearch(text, search) {
+  if (!search) return escapeHtml(text);
+  try {
+    const re = new RegExp('(' + search + ')', 'gi');
+    return escapeHtml(text).replace(new RegExp('(' + search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<span class="highlight">$1</span>');
+  } catch { return escapeHtml(text); }
+}
+
+function applyFilters() {
+  const search = state.search.toLowerCase();
+  let searchRe = null;
+  try { if (state.search) searchRe = new RegExp(state.search, 'i'); } catch {}
+
+  state.filteredLines = state.parsedLines.filter(l => {
+    if (!state.severityFilter[l.severity]) return false;
+    if (search) {
+      if (searchRe) return searchRe.test(l.raw);
+      return l.raw.toLowerCase().includes(search);
+    }
+    return true;
+  });
+}
+
+function renderLogViewer() {
+  const viewer = document.getElementById('logViewer');
+  const lines = state.filteredLines;
+  // Virtual scrolling for large files
+  const lineHeight = 22;
+  const maxRender = 2000;
+  const toRender = lines.slice(0, maxRender);
+
+  let html = '';
+  for (const l of toRender) {
+    const anomalyClass = l.isAnomaly ? ' anomaly' : '';
+    html += `<div class="log-line severity-${l.severity}${anomalyClass}" data-idx="${l.index}">`;
+    html += `<span class="ln">${l.index + 1}</span>`;
+    html += `<span class="ts">${formatTs(l.ts)}</span>`;
+    html += `<span class="sev">${l.severity === 'other' ? '—' : l.severity}</span>`;
+    html += `<span class="msg">${highlightSearch(l.message, state.search)}</span>`;
+    html += `</div>`;
+  }
+  if (lines.length > maxRender) {
+    html += `<div style="padding:12px 16px;color:var(--text-muted);font-family:var(--mono);font-size:11px;">Showing first ${maxRender.toLocaleString()} of ${lines.length.toLocaleString()} matching lines. Use search to narrow results.</div>`;
+  }
+  viewer.innerHTML = html;
+}
+
+function renderTimeline() {
+  const canvas = document.getElementById('timelineCanvas');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const w = rect.width;
+  const h = 120;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, h);
+
+  const buckets = state.buckets;
+  if (buckets.length === 0) return;
+
+  const maxVal = Math.max(1, ...buckets.map(b => b.total));
+  const barW = w / buckets.length;
+  const pad = 20;
+  const chartH = h - pad;
+
+  // Grid lines
+  ctx.strokeStyle = '#252838';
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 4; i++) {
+    const y = pad + (chartH / 4) * i;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+  }
+
+  // Bars
+  const sevColors = { fatal: '#ff4d6a', error: '#ff4d6a', warn: '#ff9f43', info: '#4da6ff', debug: '#b07aff', other: '#454a66' };
+
+  for (let i = 0; i < buckets.length; i++) {
+    const b = buckets[i];
+    const x = i * barW;
+    const barH = (b.total / maxVal) * chartH;
+
+    if (state.timelineMode === 'severity') {
+      let yOff = h;
+      for (const sev of ['fatal','error','warn','info','debug','other']) {
+        const segH = b.total > 0 ? (b[sev] / maxVal) * chartH : 0;
+        if (segH > 0) {
+          ctx.fillStyle = sevColors[sev];
+          ctx.globalAlpha = 0.85;
+          ctx.fillRect(x + 0.5, yOff - segH, Math.max(barW - 1, 1), segH);
+          yOff -= segH;
+        }
+      }
+      ctx.globalAlpha = 1;
+    } else {
+      // Check if anomaly bucket
+      const isAnomaly = state.anomalies.some(a => a.bucketIdx === i);
+      ctx.fillStyle = isAnomaly ? '#ff4d6a' : '#00d4aa';
+      ctx.globalAlpha = isAnomaly ? 0.9 : 0.6;
+      ctx.fillRect(x + 0.5, h - barH, Math.max(barW - 1, 1), barH);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // Anomaly markers
+  for (const a of state.anomalies) {
+    const x = a.bucketIdx * barW + barW / 2;
+    ctx.fillStyle = '#ff4d6a';
+    ctx.beginPath();
+    ctx.arc(x, 10, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Time labels
+  ctx.fillStyle = '#454a66';
+  ctx.font = '9px IBM Plex Mono';
+  const labelCount = Math.min(6, buckets.length);
+  for (let i = 0; i < labelCount; i++) {
+    const idx = Math.floor(i * (buckets.length - 1) / (labelCount - 1));
+    const b = buckets[idx];
+    const x = idx * barW;
+    const label = formatTs(b.start).substring(5, 16);
+    ctx.fillText(label, x, h - 2);
+  }
+
+  // Update range label
+  const rangeEl = document.getElementById('timelineRange');
+  if (buckets.length > 0) {
+    rangeEl.textContent = formatTs(buckets[0].start) + '  →  ' + formatTs(buckets[buckets.length-1].end);
+  }
+}
+
+function renderRightPanel() {
+  const panel = document.getElementById('panelRight');
+  const s = state.stats;
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const sevColors = { fatal: 'var(--red)', error: 'var(--red)', warn: 'var(--orange)', info: 'var(--blue)', debug: 'var(--purple)', other: 'var(--text-muted)' };
+
+  let html = '';
+
+  // File & Format
+  html += `<div class="rpanel-section">
+    <div class="section-title"><div class="dot" style="background:var(--accent)"></div>Overview</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="label">Total Lines</div><div class="value">${s.total.toLocaleString()}</div></div>
+      <div class="stat-card"><div class="label">Timestamped</div><div class="value">${s.withTs.toLocaleString()}</div><div class="sub">${s.total > 0 ? ((s.withTs/s.total)*100).toFixed(0) : 0}% parsed</div></div>
+      <div class="stat-card"><div class="label">Timespan</div><div class="value">${s.timespan || '—'}</div></div>
+      <div class="stat-card"><div class="label">Lines/sec</div><div class="value">${s.linesPerSec}</div></div>
+      <div class="stat-card"><div class="label">Error Rate</div><div class="value" style="color:${parseFloat(s.errorRate) > 5 ? 'var(--red)' : 'var(--text)'}">${s.errorRate}%</div></div>
+      <div class="stat-card"><div class="label">Format</div><div class="value" style="font-size:12px">${state.format}</div></div>
+    </div>
+  </div>`;
+
+  // Severity breakdown
+  const totalSev = Object.values(s.sevCounts).reduce((a,b) => a+b, 0) || 1;
+  html += `<div class="rpanel-section">
+    <div class="section-title"><div class="dot" style="background:var(--orange)"></div>Severity</div>
+    <div class="sev-bar">`;
+  for (const sev of ['fatal','error','warn','info','debug','other']) {
+    const pct = (s.sevCounts[sev] / totalSev) * 100;
+    if (pct > 0) html += `<div style="width:${pct}%;background:${sevColors[sev]}"></div>`;
+  }
+  html += `</div><div class="sev-list">`;
+  for (const sev of ['fatal','error','warn','info','debug','other']) {
+    if (s.sevCounts[sev] > 0) {
+      html += `<div class="sev-item"><div class="dot" style="background:${sevColors[sev]}"></div><div class="name">${sev}</div><div class="count">${s.sevCounts[sev].toLocaleString()}</div><div class="pct">${((s.sevCounts[sev]/totalSev)*100).toFixed(1)}%</div></div>`;
+    }
+  }
+  html += `</div></div>`;
+
+  // Hourly heatmap
+  const maxHourly = Math.max(1, ...s.hourly);
+  html += `<div class="rpanel-section">
+    <div class="section-title"><div class="dot" style="background:var(--blue)"></div>Hourly Distribution</div>
+    <div class="hourly-heat">`;
+  for (let h = 0; h < 24; h++) {
+    const intensity = s.hourly[h] / maxHourly;
+    const height = Math.max(2, intensity * 48);
+    const color = intensity > 0.7 ? 'var(--red)' : intensity > 0.4 ? 'var(--orange)' : 'var(--accent)';
+    html += `<div class="bar" style="height:${height}px;background:${color};opacity:${Math.max(0.2,intensity)}" title="${String(h).padStart(2,'0')}:00 — ${s.hourly[h].toLocaleString()} lines"></div>`;
+  }
+  html += `</div><div class="hourly-labels">`;
+  for (let h = 0; h < 24; h++) {
+    html += h % 3 === 0 ? `<span>${String(h).padStart(2,'0')}</span>` : `<span></span>`;
+  }
+  html += `</div></div>`;
+
+  // Day of week
+  const maxDow = Math.max(1, ...s.dow);
+  html += `<div class="rpanel-section">
+    <div class="section-title"><div class="dot" style="background:var(--purple)"></div>Day of Week</div>
+    <div class="dow-bars">`;
+  for (let d = 0; d < 7; d++) {
+    const pct = (s.dow[d] / maxDow) * 100;
+    html += `<div class="dow-row"><div class="day">${DAYS[d]}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--accent)"></div></div><div class="val">${s.dow[d].toLocaleString()}</div></div>`;
+  }
+  html += `</div></div>`;
+
+  // Anomalies
+  if (state.anomalies.length > 0) {
+    html += `<div class="rpanel-section">
+      <div class="section-title"><div class="dot" style="background:var(--red)"></div>Anomaly Spikes <span style="color:var(--red);font-weight:600;margin-left:auto">${state.anomalies.length}</span></div>
+      <div class="anomaly-list">`;
+    for (const a of state.anomalies) {
+      html += `<div class="anomaly-item" onclick="scrollToTime('${a.bucket.start.toISOString()}')">
+        <div class="time">${formatTs(a.bucket.start)}</div>
+        <div class="detail">${a.bucket.total} events — ${a.magnitude}</div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+
+  // Error clusters
+  if (state.clusters.length > 0) {
+    html += `<div class="rpanel-section">
+      <div class="section-title"><div class="dot" style="background:var(--red)"></div>Error Clusters <span style="color:var(--red);font-weight:600;margin-left:auto">${state.clusters.length}</span></div>
+      <div class="cluster-list">`;
+    for (const c of state.clusters) {
+      html += `<div class="cluster-item" onclick="filterByCluster('${escapeHtml(c.normalized.substring(0,60)).replace(/'/g,"\\'")}')"  title="Click to filter">
+        <div class="pattern">${escapeHtml(c.pattern)}</div>
+        <div class="meta"><span class="count-badge">${c.count}x</span>
+        ${c.first ? `<span>${formatTs(c.first).substring(5,16)}</span>` : ''}
+        ${c.last && c.first !== c.last ? `<span>→ ${formatTs(c.last).substring(5,16)}</span>` : ''}
+        </div>
+      </div>`;
+    }
+    html += `</div></div>`;
+  }
+
+  panel.innerHTML = html;
+}
+
+function renderSeverityButtons() {
+  const container = document.getElementById('severityFilters');
+  const s = state.stats;
+  let html = '';
+  for (const sev of ['fatal','error','warn','info','debug','other']) {
+    if (s.sevCounts[sev] > 0) {
+      const active = state.severityFilter[sev];
+      html += `<button class="sev-btn ${sev}${active ? '' : ' off'}" onclick="toggleSeverity('${sev}')">${sev} <span class="count">${s.sevCounts[sev].toLocaleString()}</span></button>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+function renderStatsMini() {
+  const el = document.getElementById('statsMini');
+  const f = state.filteredLines;
+  el.innerHTML = `<span>Showing <span class="val">${f.length.toLocaleString()}</span> of ${state.parsedLines.length.toLocaleString()}</span>`;
+}
+
+function renderAll() {
+  applyFilters();
+  renderLogViewer();
+  renderTimeline();
+  renderRightPanel();
+  renderSeverityButtons();
+  renderStatsMini();
+}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+function toggleSeverity(sev) {
+  state.severityFilter[sev] = !state.severityFilter[sev];
+  applyFilters();
+  renderLogViewer();
+  renderSeverityButtons();
+  renderStatsMini();
+}
+
+function setTimelineMode(mode) {
+  state.timelineMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  renderTimeline();
+}
+
+function scrollToTime(isoStr) {
+  const target = new Date(isoStr).getTime();
+  const viewer = document.getElementById('logViewer');
+  const lines = state.filteredLines;
+  let closest = 0, minDiff = Infinity;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].ts) {
+      const diff = Math.abs(lines[i].ts.getTime() - target);
+      if (diff < minDiff) { minDiff = diff; closest = i; }
+    }
+  }
+  const el = viewer.children[closest];
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.background = 'var(--accent-glow)';
+    setTimeout(() => el.style.background = '', 2000);
+  }
+}
+
+function filterByCluster(normalized) {
+  // Find original text from cluster
+  const cluster = state.clusters.find(c => c.normalized.substring(0, 60) === normalized);
+  if (cluster && cluster.lines.length > 0) {
+    const line = state.parsedLines[cluster.lines[0]];
+    if (line) {
+      const words = line.message.split(/\s+/).filter(w => w.length > 4 && !/^\d+$/.test(w)).slice(0, 3);
+      if (words.length > 0) {
+        document.getElementById('searchInput').value = words.join('.*');
+        state.search = words.join('.*');
+        applyFilters();
+        renderLogViewer();
+        renderStatsMini();
+      }
+    }
+  }
+}
+
+// Timeline tooltip
+const canvas = document.getElementById('timelineCanvas');
+const tooltip = document.getElementById('timelineTooltip');
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const idx = Math.floor((x / rect.width) * state.buckets.length);
+  if (idx >= 0 && idx < state.buckets.length) {
+    const b = state.buckets[idx];
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 12) + 'px';
+    tooltip.style.top = (e.clientY - 8) + 'px';
+    tooltip.innerHTML = `<div style="color:var(--accent)">${formatTs(b.start)}</div>
+      <div>${b.total} events</div>
+      ${b.error + b.fatal > 0 ? `<div style="color:var(--red)">${b.error + b.fatal} errors</div>` : ''}
+      ${b.warn > 0 ? `<div style="color:var(--orange)">${b.warn} warnings</div>` : ''}`;
+  }
+});
+canvas.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+canvas.addEventListener('click', e => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const idx = Math.floor((x / rect.width) * state.buckets.length);
+  if (idx >= 0 && idx < state.buckets.length) {
+    scrollToTime(state.buckets[idx].start.toISOString());
+  }
+});
+
+// Search
+let searchTimeout;
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    state.search = e.target.value;
+    applyFilters();
+    renderLogViewer();
+    renderStatsMini();
+  }, 200);
+});
+
+// ============================================================
+// FILE LOADING
+// ============================================================
+function processFile(file) {
+  state.fileName = file.name;
+  state.fileSize = file.size;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const rawLines = text.split(/\r?\n/);
+    state.rawLines = rawLines;
+    state.format = detectFormat(rawLines);
+
+    // Parse lines (chunked for large files)
+    state.parsedLines = [];
+    for (let i = 0; i < rawLines.length; i++) {
+      const parsed = parseLine(rawLines[i], i, state.format);
+      if (parsed) state.parsedLines.push(parsed);
+    }
+
+    // Analysis
+    state.stats = computeStats(state.parsedLines);
+    state.buckets = buildTimeBuckets(state.parsedLines);
+    state.anomalies = detectAnomalies(state.buckets);
+    state.clusters = clusterErrors(state.parsedLines);
+
+    // Mark anomaly lines
+    for (const a of state.anomalies) {
+      for (const l of state.parsedLines) {
+        if (l.ts && l.ts >= a.bucket.start && l.ts < a.bucket.end) l.isAnomaly = true;
+      }
+    }
+
+    // Update UI
+    document.getElementById('dropContainer').style.display = 'none';
+    document.getElementById('mainView').style.display = 'flex';
+    document.getElementById('headerSubtitle').style.display = 'none';
+
+    const fileInfo = document.getElementById('fileInfo');
+    fileInfo.style.display = 'flex';
+    const sizeStr = file.size > 1048576 ? (file.size / 1048576).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
+    fileInfo.innerHTML = `<span class="tag">${escapeHtml(file.name)}</span><span class="tag">${sizeStr}</span><span class="tag">${state.parsedLines.length.toLocaleString()} lines</span><span class="format-badge">${state.format}</span>`;
+
+    renderAll();
+
+    // Resize handler
+    window.addEventListener('resize', () => { renderTimeline(); });
+  };
+  reader.readAsText(file);
+}
+
+// Drag and drop
+const dropzone = document.getElementById('dropzone');
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
+dropzone.addEventListener('dragleave', () => { dropzone.classList.remove('dragover'); });
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]);
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+  if (e.target.files.length > 0) processFile(e.target.files[0]);
+});
+
+// Also allow dropping on the whole page when viewing logs
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => {
+  e.preventDefault();
+  if (e.dataTransfer.files.length > 0) {
+    // Reset state
+    state.search = '';
+    state.severityFilter = { fatal: true, error: true, warn: true, info: true, debug: true, other: true };
+    document.getElementById('searchInput').value = '';
+    processFile(e.dataTransfer.files[0]);
+  }
+});
+</script>
+</body>
+</html>
