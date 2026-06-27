@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#1e1e2e">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LogLens v0.2.0</title>
+    <title>LogLens v0.3.0</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -91,7 +91,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .log-line .ln{color:var(--text-muted);width:45px;text-align:right;flex-shrink:0;user-select:none}
 .log-line .ts{color:var(--text-dim);flex-shrink:0;min-width:150px}
 .log-line .sev{font-weight:600;flex-shrink:0;min-width:50px;text-transform:uppercase;font-size:10px;padding-top:1px}
-.log-line .msg{color:var(--text);white-space:pre-wrap;word-break:break-all;flex:1}
+.log-line .msg{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;word-break:normal;flex:1;min-width:0}
 .log-line .msg .highlight{background:var(--yellow);color:var(--bg);padding:0 2px;border-radius:2px}
 .log-line .fields{display:flex;gap:6px;flex-shrink:0}
 .log-line .field-tag{font-size:9px;padding:1px 5px;border-radius:3px;background:var(--surface3);color:var(--text-dim);white-space:nowrap}
@@ -166,13 +166,43 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 .toast{position:fixed;bottom:20px;right:20px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-family:var(--mono);font-size:12px;color:var(--text);z-index:200;animation:slideUp .2s ease;display:none}
 .toast.success{border-color:var(--accent);color:var(--accent)}.toast.error{border-color:var(--red);color:var(--red)}
 .loading-bar{position:absolute;top:0;left:0;height:2px;background:var(--accent);transition:width .1s;z-index:50;display:none}
+.tool-btn{padding:4px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text-dim);font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .12s}
+.tool-btn:hover,.tool-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+.source-filter{display:flex;gap:3px;flex-wrap:wrap;max-width:360px}
+.src-btn{padding:3px 7px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);color:var(--text-dim);font-family:var(--mono);font-size:10px;cursor:pointer;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.src-btn.off{opacity:.3}.src-btn.active{border-color:var(--accent);color:var(--accent)}
+.line-source{color:var(--accent);font-family:var(--mono);font-size:9px;border:1px solid var(--accent-dim);border-radius:3px;padding:0 4px;align-self:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0}
+.line-badges{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.pill{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);border-radius:4px;background:var(--surface2);color:var(--text-dim);font-family:var(--mono);font-size:9px;padding:2px 5px}
+.metric-list,.pattern-list,.request-list,.note-list,.saved-list,.season-list,.snapshot-list{display:flex;flex-direction:column;gap:5px;max-height:260px;overflow-y:auto}
+.metric-item,.pattern-item,.request-item,.note-item,.saved-item,.season-item{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:6px 8px}
+.metric-item strong,.pattern-item strong,.request-item strong,.note-item strong,.saved-item strong,.season-item strong{font-family:var(--mono);font-size:10px;color:var(--text)}
+.metric-item .meta,.pattern-item .meta,.request-item .meta,.note-item .meta,.saved-item .meta,.season-item .meta{font-family:var(--mono);font-size:9px;color:var(--text-muted);margin-top:3px;line-height:1.35}
+.calendar-grid{display:grid;grid-template-columns:repeat(14,1fr);gap:2px}
+.calendar-cell{aspect-ratio:1;border-radius:2px;background:var(--surface2);border:1px solid rgba(255,255,255,.02)}
+.stacked-bars{display:flex;gap:1px;align-items:flex-end;height:44px}
+.stacked-bar{flex:1;display:flex;flex-direction:column-reverse;min-width:2px;background:var(--surface2)}
+.stacked-seg{width:100%;min-height:1px}
+.flow-row{display:grid;grid-template-columns:1fr 20px 1fr 20px 1fr;gap:5px;align-items:center;font-family:var(--mono);font-size:9px;color:var(--text-dim);margin-bottom:4px}
+.flow-row .flow-val{height:8px;border-radius:4px;background:var(--accent)}
+.flame-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-family:var(--mono);font-size:9px;color:var(--text-dim)}
+.flame-row .bar{height:12px;border-radius:3px;background:linear-gradient(90deg,var(--orange),var(--red));min-width:2px}
+.inline-input{width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:var(--mono);font-size:10px;padding:5px 7px;margin-top:6px}
+.inline-actions{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:150}
+.modal{width:min(680px,calc(100vw - 40px));background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:16px}
+.modal h3{font-family:var(--display);font-size:18px;color:var(--accent);letter-spacing:1px;margin-bottom:10px}
+.modal label{display:block;font-family:var(--mono);font-size:10px;color:var(--text-muted);margin:8px 0 4px;text-transform:uppercase}
+.modal textarea{min-height:88px;resize:vertical}
+.modal .test-result{font-family:var(--mono);font-size:10px;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:8px;margin-top:8px;white-space:pre-wrap;max-height:140px;overflow:auto}
+.playhead{position:absolute;top:28px;bottom:0;width:1px;background:var(--yellow);box-shadow:0 0 8px var(--yellow);pointer-events:none;display:none}
 </style>
 </head>
 <body>
 <div id="app">
   <div class="header">
     <h1>LOGLENS</h1>
-    <span class="version">v0.2.0</span>
+    <span class="version">v0.3.0</span>
     <div class="file-info" id="fileInfo" style="display:none"></div>
     <div class="actions" id="headerActions" style="display:none">
       <button class="act-btn" onclick="exportFiltered()" title="Export filtered lines">
@@ -182,6 +212,22 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
       <button class="act-btn" onclick="exportBookmarks()" title="Export bookmarked lines">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>
         Bookmarks
+      </button>
+      <button class="act-btn" onclick="exportMarkdownReport()" title="Export Markdown incident report">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+        Report
+      </button>
+      <button class="act-btn" onclick="exportSnapshot()" title="Export static HTML snapshot">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><path d="M3.3 7l8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+        Snapshot
+      </button>
+      <button class="act-btn" onclick="toggleLiveTail()" title="Watch a file with the File System Access API">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        Live
+      </button>
+      <button class="act-btn" onclick="openFormatBuilder()" title="Custom format builder">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h10M4 17h16"/><circle cx="18" cy="12" r="2"/></svg>
+        Format
       </button>
       <button class="act-btn" onclick="loadNewFile()" title="Load new file">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -195,8 +241,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
       <div class="icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg></div>
       <h2>DROP LOG FILE</h2>
       <p>or click to browse</p>
-      <div class="formats"><span>Syslog</span><span>Apache</span><span>Nginx</span><span>IIS</span><span>JSON</span><span>CSV</span><span>Windows Event</span><span>Multiline</span><span>Generic</span></div>
-      <input type="file" id="fileInput" accept=".log,.txt,.csv,.json,.tsv,.out,.err">
+      <div class="formats"><span>Syslog</span><span>Apache</span><span>Nginx</span><span>IIS</span><span>JSON</span><span>Docker</span><span>K8s</span><span>Cloud</span><span>.gz</span><span>.zip</span><span>Multiline</span></div>
+      <input type="file" id="fileInput" accept=".log,.txt,.csv,.json,.tsv,.out,.err,.gz,.tgz,.zip" multiple>
     </div>
   </div>
   <div class="main" id="mainView" style="display:none">
@@ -206,6 +252,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
         <input type="text" id="searchInput" placeholder="Search logs... (regex supported)">
       </div>
       <div class="severity" id="severityFilters"></div>
+      <div class="source-filter" id="sourceFilters"></div>
+      <button class="tool-btn" id="incidentBtn" onclick="toggleIncidentMode()">Incident</button>
+      <button class="tool-btn" onclick="saveCurrentQuery()">Save Query</button>
+      <button class="tool-btn" onclick="togglePlayback()" id="playBtn">Play</button>
       <div class="brush-info" id="brushInfo" style="display:none"></div>
       <div class="stats-mini" id="statsMini"></div>
     </div>
@@ -223,6 +273,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
           </div>
           <canvas id="timelineCanvas"></canvas>
           <div class="brush-overlay" id="brushOverlay"></div>
+          <div class="playhead" id="playhead"></div>
         </div>
         <div class="log-container">
           <div class="log-viewer" id="logViewer"></div>
@@ -235,6 +286,24 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 </div>
 <div class="tooltip" id="tooltip"></div>
 <div class="toast" id="toast"></div>
+<div class="modal-backdrop" id="formatModal">
+  <div class="modal">
+    <h3>Custom Format</h3>
+    <label>Name</label>
+    <input class="inline-input" id="customFormatName" placeholder="Proprietary access log">
+    <label>Regex with named groups</label>
+    <textarea class="inline-input" id="customFormatRegex" placeholder="^(?<ts>\\S+ \\S+) (?<level>INFO|WARN|ERROR) \\[(?<component>[^\\]]+)\\] (?<message>.*)$"></textarea>
+    <label>Sample line</label>
+    <textarea class="inline-input" id="customFormatSample" placeholder="2026-06-27 12:00:00 ERROR [api] request_id=abc took=42ms failed"></textarea>
+    <div class="test-result" id="customFormatResult">No custom format saved.</div>
+    <div class="inline-actions">
+      <button class="tool-btn" onclick="testCustomFormat()">Test</button>
+      <button class="tool-btn" onclick="saveCustomFormat()">Save</button>
+      <button class="tool-btn" onclick="clearCustomFormat()">Clear</button>
+      <button class="tool-btn" onclick="closeFormatBuilder()">Close</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════
@@ -251,9 +320,35 @@ const S = {
   brush:null, // {startIdx, endIdx} bucket indices
   scrollTop:0,viewerHeight:0,
 };
+Object.assign(S, {
+  sources:[],
+  sourceFilter:{},
+  comparison:null,
+  hotPatterns:[],
+  genealogies:[],
+  requestGroups:[],
+  latency:null,
+  statusMix:[],
+  seasonality:[],
+  flow:[],
+  flame:[],
+  annotations:[],
+  savedQueries:[],
+  incidentMode:false,
+  queryPlan:null,
+  customFormat:null,
+  live:{enabled:false,handle:null,timer:null,lastText:'',sourceName:''},
+  playback:{active:false,idx:0,timer:null}
+});
 const LINE_H = 22;
 const SEVCOLORS = {fatal:'#ff4d6a',error:'#ff4d6a',warn:'#ff9f43',info:'#4da6ff',debug:'#b07aff',other:'#454a66'};
 const DAYS_S = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const STORE_KEYS = {
+  queries:'loglens.savedQueries.v1',
+  notes:'loglens.annotations.v1',
+  custom:'loglens.customFormat.v1',
+  llama:'loglens.llamaEndpoint.v1'
+};
 
 // ═══════════════════════════════════════════
 // PARSING ENGINE
@@ -857,81 +952,1048 @@ document.getElementById('searchInput').addEventListener('input', e => {
 });
 
 // ═══════════════════════════════════════════
-// FILE LOADING
-// ═══════════════════════════════════════════
-function processFile(file) {
-  S.fileName = file.name; S.fileSize = file.size;
-  S.bookmarks = new Set(); S.brush = null; S.search = '';
-  document.getElementById('searchInput').value = '';
-  document.getElementById('brushInfo').style.display = 'none';
+// Advanced roadmap layer
+const ADV_FMT_DET = [
+  {name:'OpenTelemetry Logs',test:ls=>jsonSample(ls,o=>o.timeUnixNano||o.observedTimeUnixNano||o.severityText||o.resourceLogs||o.scopeLogs)},
+  {name:'Systemd Journal',test:ls=>jsonSample(ls,o=>o.__REALTIME_TIMESTAMP||o._SYSTEMD_UNIT||o.PRIORITY!==undefined||o.MESSAGE)},
+  {name:'CloudWatch Logs',test:ls=>jsonSample(ls,o=>o['@timestamp']&&o['@message']||o.logStream||o.logGroup)},
+  {name:'Stackdriver Logs',test:ls=>jsonSample(ls,o=>o.timestamp&&(o.jsonPayload||o.textPayload||o.protoPayload)||o.severity&&o.resource)},
+  {name:'Azure Monitor Logs',test:ls=>jsonSample(ls,o=>o.TimeGenerated||o.Category&&o.OperationName||o.Level&&o.Message)},
+  {name:'Docker Logs',test:ls=>ls.filter(l=>/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\s+(stdout|stderr)\s+/.test(l)||/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\s+\{.*"log"/.test(l)).length>=2},
+  {name:'Kubernetes CRI',test:ls=>ls.filter(l=>/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z\s+(stdout|stderr)\s+[FP]\s+/.test(l)).length>=2},
+  {name:'HAProxy',test:ls=>ls.filter(l=>/\bhaproxy\[\d+\]:|"\w+\s+\S+\s+HTTP\/\d/.test(l)&&/\s\d{3}\s/.test(l)).length>=2},
+  {name:'Nginx Error Log',test:ls=>ls.filter(l=>/^\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+\[(error|warn|notice|info|debug|crit|alert|emerg)\]/i.test(l)).length>=2},
+  {name:'PostgreSQL Log',test:ls=>ls.filter(l=>/\b(LOG|ERROR|FATAL|WARNING):|\bduration:\s+\d+\.?\d*\s+ms\b/i.test(l)).length>=2},
+  {name:'MySQL Slow Query',test:ls=>ls.some(l=>/^# Time:|^# Query_time:|^SET timestamp=/.test(l))}
+];
 
-  const loadBar = document.getElementById('loadingBar');
-  loadBar.style.display = 'block'; loadBar.style.width = '10%';
+function jsonSample(lines, predicate) {
+  let hits = 0, seen = 0;
+  for (const line of lines.slice(0, 25)) {
+    if (!line.trim().startsWith('{')) continue;
+    seen++;
+    try { if (predicate(JSON.parse(line))) hits++; } catch {}
+  }
+  return seen > 0 && hits >= Math.min(2, seen);
+}
 
-  const reader = new FileReader();
-  reader.onprogress = e => { if (e.lengthComputable) loadBar.style.width = ((e.loaded / e.total) * 50) + '%'; };
-  reader.onload = function(e) {
-    loadBar.style.width = '60%';
-    const text = e.target.result;
-    const rawLines = text.split(/\r?\n/);
-    S.rawLines = rawLines;
-    S.format = detectFormat(rawLines);
-    loadBar.style.width = '70%';
+function detectFormat(lines) {
+  const sample = lines.filter(l => l && l.trim()).slice(0, 50);
+  if (S.customFormat?.regex && sample.some(l => testCustomRegex(l))) return S.customFormat.name || 'Custom Format';
+  for (const f of ADV_FMT_DET) if (f.test(sample)) return f.name;
+  for (const f of FMT_DET) if (f.test(sample)) return f.name;
+  return 'Generic';
+}
 
-    S.parsedLines = [];
-    for (let i = 0; i < rawLines.length; i++) {
-      const parsed = parseLine(rawLines[i], i, S.format);
-      if (parsed) S.parsedLines.push(parsed);
-    }
-    loadBar.style.width = '80%';
+function parseJsonLine(line) {
+  try {
+    const o = JSON.parse(line);
+    const body = unwrapJsonValue(o.body ?? o.Body ?? o.message ?? o.msg ?? o['@message'] ?? o.textPayload ?? o.jsonPayload?.message ?? o.Message ?? o.MESSAGE);
+    const rawTs = firstDefined(o.timeUnixNano,o.observedTimeUnixNano,o.timestamp,o['@timestamp'],o.time,o.date,o.datetime,o.ts,o.created_at,o.TimeGenerated,o.__REALTIME_TIMESTAMP);
+    let ts = parseJsonTimestamp(rawTs);
+    let sev = severityFromValue(firstDefined(o.severityText,o.severity,o.level,o.loglevel,o.log_level,o.status,o.priority,o.PRIORITY,o.Level));
+    let msg = body ? String(body) : line;
+    if (o.jsonPayload && !body) msg = String(o.jsonPayload.message || JSON.stringify(o.jsonPayload));
+    if (o.resourceLogs) msg = flattenOtelMessage(o) || msg;
+    const fields = flattenJsonFields(o);
+    return {ts,severity:sev,message:msg,fields};
+  } catch { return null; }
+}
 
-    // Multiline grouping
-    groupMultilines(S.parsedLines);
+function parseJsonTimestamp(raw) {
+  if (raw === undefined || raw === null || raw === '') return null;
+  if (typeof raw === 'number') {
+    if (raw > 1e15) return new Date(raw / 1e6);
+    if (raw > 1e12) return new Date(raw);
+    if (raw > 1e9) return new Date(raw * 1000);
+  }
+  const s = String(raw);
+  if (/^\d{16,}$/.test(s)) return new Date(Number(s) / 1000);
+  if (/^\d{13}$/.test(s)) return new Date(Number(s));
+  if (/^\d{10}$/.test(s)) return new Date(Number(s) * 1000);
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
 
-    // Analysis
-    S.stats = computeStats(S.parsedLines);
-    S.buckets = buildBuckets(S.parsedLines);
-    S.anomalies = detectAnomalies(S.buckets);
-    S.rateChanges = detectRateChanges(S.buckets);
-    S.correlations = findCorrelations(S.buckets);
-    S.clusters = clusterErrors(S.parsedLines);
-    loadBar.style.width = '90%';
+function firstDefined(...vals) { return vals.find(v => v !== undefined && v !== null && v !== ''); }
+function unwrapJsonValue(v) {
+  if (v === undefined || v === null) return '';
+  if (typeof v !== 'object') return v;
+  if ('stringValue' in v) return v.stringValue;
+  if ('intValue' in v) return v.intValue;
+  if ('doubleValue' in v) return v.doubleValue;
+  if ('boolValue' in v) return v.boolValue;
+  return JSON.stringify(v);
+}
+function flattenOtelMessage(o) {
+  try {
+    const logs = o.resourceLogs?.flatMap(r => r.scopeLogs || []).flatMap(s => s.logRecords || []);
+    return logs?.map(r => unwrapJsonValue(r.body)).filter(Boolean).join(' | ') || '';
+  } catch { return ''; }
+}
+function flattenJsonFields(o, prefix = '', out = {}) {
+  for (const [k, v] of Object.entries(o || {})) {
+    const key = prefix ? prefix + '.' + k : k;
+    if (v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length < 25) flattenJsonFields(v, key, out);
+    else out[key] = unwrapJsonValue(v);
+  }
+  return out;
+}
+function severityFromValue(value) {
+  if (value === undefined || value === null || value === '') return 'other';
+  if (typeof value === 'number') {
+    if (value <= 2) return 'fatal';
+    if (value === 3) return 'error';
+    if (value === 4) return 'warn';
+    if (value <= 6) return 'info';
+    return 'debug';
+  }
+  const raw = String(value);
+  for (const s of SEV_PAT) if (s.re.test(raw)) return s.level;
+  return 'other';
+}
 
-    // Mark anomaly lines
-    for (const a of S.anomalies) {
-      for (const l of S.parsedLines) {
-        if (l.ts && l.ts >= a.bucket.start && l.ts < a.bucket.end) l.isAnomaly = true;
+function extractStructuredFields(line, format) {
+  if (format === 'Apache Combined' || format === 'Nginx') {
+    const re = format === 'Apache Combined' ? APACHE_RE : NGINX_RE;
+    const m = line.match(re);
+    if (m) return {ip:m[1],user:m[2],method:m[4],url:m[5],status:+m[6],bytes:m[7]==='-'?0:+m[7]};
+  }
+  if (format === 'HAProxy') {
+    const m = line.match(/(\d+\.\d+\.\d+\.\d+):\d+.*"(\w+)\s+(\S+).*"\s+(\d{3})\s+(\d+)/);
+    if (m) return {ip:m[1],method:m[2],url:m[3],status:+m[4],bytes:+m[5]};
+  }
+  return null;
+}
+
+function parseLine(line, index, format, source = null, sourceLine = index) {
+  if (!line.trim()) return null;
+  let ts = null, severity = 'other', message = line, fields = {}, structured = null;
+  const custom = parseCustomLine(line);
+  if (custom) ({ts,severity,message,fields} = custom);
+  else if (/^(JSON Lines|Systemd Journal|OpenTelemetry Logs|CloudWatch Logs|Stackdriver Logs|Azure Monitor Logs)$/.test(format)) {
+    const j = parseJsonLine(line);
+    if (j) ({ts,severity,message,fields} = j); else { ts = parseTs(line); severity = parseSev(line); }
+  } else if (format === 'Docker Logs' || format === 'Kubernetes CRI') {
+    const c = parseContainerLine(line);
+    if (c) ({ts,severity,message,fields} = c); else { ts = parseTs(line); severity = parseSev(line); }
+  } else if (format === 'Nginx Error Log') {
+    const m = line.match(/^(\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2})\s+\[(\w+)\]\s+\d+#\d+:\s*(.*)$/i);
+    if (m) { ts = parseTs(m[1]); severity = severityFromValue(m[2]); message = m[3]; fields = {component:'nginx',level:m[2]}; }
+  } else {
+    ts = parseTs(line); severity = parseSev(line); structured = extractStructuredFields(line, format);
+  }
+  const item = {index,raw:line,ts,severity,message,fields,structured,isAnomaly:false,isChild:false,parentIdx:null,sourceId:source?.id ?? 0,sourceName:source?.name || '',sourceLine,component:null,requestId:null,latencyMs:null,status:null,template:''};
+  return enrichLine(item);
+}
+
+function parseContainerLine(line) {
+  let m = line.match(/^(\d{4}-\d{2}-\d{2}T\S+)\s+(stdout|stderr)\s+[FP]\s+(.*)$/);
+  if (!m) m = line.match(/^(\d{4}-\d{2}-\d{2}T\S+)\s+(.*)$/);
+  if (!m) return null;
+  const msg = m[3] || m[2] || '';
+  const fields = {stream:m[2] || 'stdout'};
+  return {ts:new Date(m[1]),severity:parseSev(msg),message:msg,fields};
+}
+
+function parseCustomLine(line) {
+  if (!S.customFormat?.regex) return null;
+  try {
+    const m = line.match(new RegExp(S.customFormat.regex));
+    if (!m) return null;
+    const g = m.groups || {};
+    const msg = firstDefined(g.message,g.msg,g.text,g.body,line);
+    return {
+      ts: parseTs(firstDefined(g.ts,g.timestamp,g.time,g.date,line) || line),
+      severity: severityFromValue(firstDefined(g.level,g.severity,g.sev,line)),
+      message: String(msg),
+      fields: {...g,customFormat:S.customFormat.name || 'Custom Format'}
+    };
+  } catch { return null; }
+}
+function testCustomRegex(line) { try { return new RegExp(S.customFormat.regex).test(line); } catch { return false; } }
+
+function enrichLine(l) {
+  const f = l.fields || {};
+  const text = [l.raw,l.message,Object.values(f).join(' ')].join(' ');
+  l.status = l.structured?.status || numberField(f, ['status','statusCode','http.status_code','StatusCode','sc-status']) || extractStatusCode(text);
+  l.latencyMs = extractLatencyMs(text, f);
+  l.requestId = extractRequestId(text, f);
+  l.component = extractComponent(text, f, l.sourceName);
+  l.template = normalizePattern(l.message || l.raw);
+  return l;
+}
+
+function numberField(fields, keys) {
+  for (const k of keys) if (fields[k] !== undefined && !isNaN(+fields[k])) return +fields[k];
+  return null;
+}
+
+function extractStatusCode(text) {
+  const m = text.match(/\b(?:status|status_code|http_status|sc-status)[=:\s]+([1-5]\d{2})\b/i) || text.match(/"\w+\s+\S+\s+HTTP\/\d(?:\.\d)?"\s+([1-5]\d{2})\b/);
+  return m ? +m[1] : null;
+}
+
+function extractLatencyMs(text, fields = {}) {
+  const direct = numberField(fields, ['durationMs','duration_ms','latency_ms','elapsed_ms','DurationMs']);
+  if (direct !== null) return direct;
+  const m = text.match(/\b(?:took|duration|elapsed|latency|time|query_time)[=:\s]+([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds?|s|sec|seconds?|m|minutes?)\b/i) || text.match(/\b([0-9]+(?:\.[0-9]+)?)\s*(ms|milliseconds?)\b/i);
+  if (!m) return null;
+  const n = +m[1], unit = (m[2] || 'ms').toLowerCase();
+  if (unit.startsWith('m') && unit !== 'ms' && !unit.startsWith('milli')) return n * 60000;
+  if (unit.startsWith('s')) return n * 1000;
+  return n;
+}
+
+function extractRequestId(text, fields = {}) {
+  for (const [k, v] of Object.entries(fields)) if (/request|trace|correlation|span/i.test(k) && String(v).length >= 6) return String(v);
+  const m = text.match(/\b(?:trace[-_ ]?id|request[-_ ]?id|req[-_ ]?id|correlation[-_ ]?id|x-correlation-id|span[-_ ]?id)[=: ]+["']?([A-Za-z0-9_.:-]{6,})/i);
+  return m ? m[1] : null;
+}
+
+function extractComponent(text, fields = {}, fallback = '') {
+  for (const k of ['service.name','service_name','service','app','application','component','logger','logger_name','container','container_name','pod','pod_name','_SYSTEMD_UNIT','syslog.identifier','Category']) {
+    if (fields[k]) return String(fields[k]).substring(0, 40);
+  }
+  const bracket = text.match(/\[([A-Za-z][\w.-]{2,40})\]/);
+  if (bracket) return bracket[1];
+  const proc = text.match(/\b([A-Za-z][\w.-]{2,40})(?:\[\d+\])?:/);
+  return proc ? proc[1] : (fallback || 'unknown');
+}
+
+function normalizePattern(msg) {
+  return String(msg || '')
+    .replace(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g,'IP')
+    .replace(/[0-9a-f]{12,}/gi,'HASH')
+    .replace(/0x[0-9a-f]+/gi,'0xN')
+    .replace(/[A-Fa-f0-9-]{32,}/g,'ID')
+    .replace(/\b\d+(?:\.\d+)?\b/g,'N')
+    .replace(/\/[^\s"']+/g,'/PATH')
+    .replace(/"[^"]*"/g,'"S"')
+    .replace(/'[^']*'/g,"'S'")
+    .replace(/\s+/g,' ')
+    .trim()
+    .substring(0, 160);
+}
+
+function groupMultilines(lines) {
+  const bySource = new Map();
+  for (const l of lines) {
+    const key = l.sourceId ?? 0;
+    if (!bySource.has(key)) bySource.set(key, []);
+    bySource.get(key).push(l);
+  }
+  for (const group of bySource.values()) {
+    for (let i = 1; i < group.length; i++) {
+      if (!group[i].ts && isMultilineContinuation(group[i].raw)) {
+        let parent = i - 1;
+        while (parent >= 0 && group[parent].isChild) parent = group.findIndex(x => x.index === group[parent].parentIdx);
+        if (parent >= 0) {
+          group[i].isChild = true;
+          group[i].parentIdx = group[parent].index;
+          group[i].severity = group[parent].severity;
+          group[i].ts = group[parent].ts;
+          group[i].component = group[parent].component;
+          group[i].requestId = group[parent].requestId;
+        }
       }
     }
+  }
+  return lines;
+}
 
-    // Show UI
-    document.getElementById('dropContainer').style.display = 'none';
-    document.getElementById('mainView').style.display = 'flex';
-    document.getElementById('headerSubtitle').style.display = 'none';
-    document.getElementById('headerActions').style.display = 'flex';
+function computeStats(lines) {
+  const total=lines.length;const withTs=lines.filter(l=>l.ts);
+  const sev={fatal:0,error:0,warn:0,info:0,debug:0,other:0};
+  const hourly=new Array(24).fill(0);const dow=new Array(7).fill(0);const sourceCounts={};const components={};
+  for(const l of lines){sev[l.severity]++;sourceCounts[l.sourceName||'log']=(sourceCounts[l.sourceName||'log']||0)+1;components[l.component||'unknown']=(components[l.component||'unknown']||0)+1;if(l.ts){hourly[l.ts.getHours()]++;dow[l.ts.getDay()]++}}
+  let timespan='';let lps='-';
+  if(withTs.length>=2){
+    const minT=Math.min(...withTs.map(l=>l.ts.getTime()));const maxT=Math.max(...withTs.map(l=>l.ts.getTime()));
+    const diffMs=maxT-minT;const diffH=diffMs/3600000;
+    if(diffH<1)timespan=Math.max(1,Math.round(diffMs/60000))+' min';else if(diffH<48)timespan=diffH.toFixed(1)+' hours';else timespan=(diffH/24).toFixed(1)+' days';
+    lps=diffMs>0?(total/(diffMs/1000)).toFixed(1):'-';
+  }
+  return{total,withTs:withTs.length,sevCounts:sev,hourly,dow,sourceCounts,components,timespan,lps,errorRate:total>0?(((sev.error+sev.fatal)/total)*100).toFixed(1):'0'};
+}
 
-    const fileInfo = document.getElementById('fileInfo');
-    fileInfo.style.display = 'flex';
-    const sizeStr = file.size > 1048576 ? (file.size / 1048576).toFixed(1) + ' MB' : (file.size / 1024).toFixed(1) + ' KB';
-    fileInfo.innerHTML = `<span class="tag">${esc(file.name)}</span><span class="tag">${sizeStr}</span><span class="tag">${S.parsedLines.length.toLocaleString()} lines</span><span class="format-badge">${S.format}</span>`;
+function runAnalysis() {
+  S.stats = computeStats(S.parsedLines);
+  S.buckets = buildBuckets(S.parsedLines);
+  S.anomalies = detectAnomalies(S.buckets);
+  S.rateChanges = detectRateChanges(S.buckets);
+  S.correlations = findCorrelations(S.buckets);
+  S.clusters = clusterErrors(S.parsedLines);
+  S.hotPatterns = detectHotPatterns(S.parsedLines);
+  S.genealogies = detectErrorGenealogy(S.parsedLines);
+  S.requestGroups = detectRequestGroups(S.parsedLines);
+  S.latency = computeLatency(S.parsedLines);
+  S.statusMix = buildStatusMix(S.parsedLines);
+  S.seasonality = detectSeasonality(S.buckets);
+  S.flow = buildFlow(S.parsedLines);
+  S.flame = buildFlame(S.parsedLines);
+  S.comparison = buildComparison(S.parsedLines, S.sources);
+  for (const l of S.parsedLines) l.isAnomaly = false;
+  for (const a of S.anomalies) for (const l of S.parsedLines) if (l.ts && l.ts >= a.bucket.start && l.ts < a.bucket.end) l.isAnomaly = true;
+}
 
+function detectHotPatterns(lines) {
+  const withTs = lines.filter(l => l.ts);
+  const maxT = withTs.length ? Math.max(...withTs.map(l => l.ts.getTime())) : Date.now();
+  const cutoff = maxT - 86400000;
+  const map = {};
+  for (const l of lines) {
+    const key = l.template || normalizePattern(l.message);
+    if (!key) continue;
+    if (!map[key]) map[key] = {pattern:key,recent:0,base:0,sev:l.severity,first:l.ts,last:l.ts};
+    if (l.ts && l.ts.getTime() >= cutoff) map[key].recent++; else map[key].base++;
+    if (l.ts && (!map[key].first || l.ts < map[key].first)) map[key].first = l.ts;
+    if (l.ts && (!map[key].last || l.ts > map[key].last)) map[key].last = l.ts;
+  }
+  return Object.values(map).map(p => ({...p,drift:p.base===0?'new':(p.recent/Math.max(1,p.base)).toFixed(1)+'x'})).sort((a,b)=>(b.recent-b.base)-(a.recent-a.base)).slice(0,15);
+}
+
+function detectErrorGenealogy(lines) {
+  const childMap = new Map();
+  for (const l of lines) if (l.isChild && l.parentIdx !== null) {
+    if (!childMap.has(l.parentIdx)) childMap.set(l.parentIdx, []);
+    childMap.get(l.parentIdx).push(l.raw.trim());
+  }
+  const groups = {};
+  for (const l of lines.filter(x => x.severity === 'error' || x.severity === 'fatal')) {
+    const frames = (childMap.get(l.index) || []).filter(x => /(?:at |File |\.java:|\.py:|Caused by)/.test(x));
+    const key = frames.slice(0, 3).map(normalizePattern).join(' | ') || l.template;
+    if (!groups[key]) groups[key] = {key,count:0,examples:[],components:new Set(),sources:new Set()};
+    groups[key].count++; groups[key].components.add(l.component || 'unknown'); groups[key].sources.add(l.sourceName || 'log');
+    if (groups[key].examples.length < 2) groups[key].examples.push(l.message);
+  }
+  return Object.values(groups).map(g => ({...g,components:[...g.components],sources:[...g.sources]})).sort((a,b)=>b.count-a.count).slice(0,10);
+}
+
+function detectRequestGroups(lines) {
+  const groups = {};
+  for (const l of lines) if (l.requestId) {
+    if (!groups[l.requestId]) groups[l.requestId] = {id:l.requestId,count:0,first:l.ts,last:l.ts,errors:0,warnings:0,sources:new Set(),components:new Set(),latencies:[]};
+    const g = groups[l.requestId]; g.count++; if (l.severity === 'error' || l.severity === 'fatal') g.errors++; if (l.severity === 'warn') g.warnings++;
+    if (l.ts && (!g.first || l.ts < g.first)) g.first = l.ts; if (l.ts && (!g.last || l.ts > g.last)) g.last = l.ts;
+    if (l.latencyMs !== null) g.latencies.push(l.latencyMs); g.sources.add(l.sourceName || 'log'); g.components.add(l.component || 'unknown');
+  }
+  return Object.values(groups).map(g => ({...g,sources:[...g.sources],components:[...g.components],duration:g.first&&g.last?g.last-g.first:0,maxLatency:g.latencies.length?Math.max(...g.latencies):null})).sort((a,b)=>(b.errors-a.errors)||(b.duration-a.duration)).slice(0,20);
+}
+
+function computeLatency(lines) {
+  const vals = lines.map(l => l.latencyMs).filter(v => v !== null && isFinite(v)).sort((a,b)=>a-b);
+  if (!vals.length) return null;
+  const p = q => vals[Math.min(vals.length - 1, Math.floor((vals.length - 1) * q))];
+  return {count:vals.length,p50:p(.5),p95:p(.95),p99:p(.99),max:vals[vals.length-1],avg:vals.reduce((a,b)=>a+b,0)/vals.length};
+}
+
+function buildStatusMix(lines, numBuckets=40) {
+  const withStatus = lines.filter(l => l.ts && l.status);
+  if (!withStatus.length) return [];
+  const minT = Math.min(...withStatus.map(l=>l.ts.getTime())), maxT = Math.max(...withStatus.map(l=>l.ts.getTime())), range = maxT - minT || 1, step = range / numBuckets;
+  const buckets = Array.from({length:numBuckets},(_,i)=>({start:new Date(minT+i*step),total:0,s2:0,s3:0,s4:0,s5:0}));
+  for (const l of withStatus) {
+    const b = buckets[Math.min(numBuckets-1,Math.floor((l.ts.getTime()-minT)/step))];
+    b.total++; if (l.status >= 500) b.s5++; else if (l.status >= 400) b.s4++; else if (l.status >= 300) b.s3++; else b.s2++;
+  }
+  return buckets;
+}
+
+function detectSeasonality(buckets) {
+  if (buckets.length < 24) return [];
+  const series = buckets.map(b=>b.total), out = [];
+  for (let lag = 2; lag <= Math.min(72, Math.floor(series.length/2)); lag++) {
+    const a = series.slice(lag), b = series.slice(0, series.length - lag), r = correlation(a,b);
+    if (r > .45) out.push({lag,r,period:formatPeriod((buckets[1].start - buckets[0].start) * lag)});
+  }
+  return out.sort((a,b)=>b.r-a.r).slice(0,5);
+}
+function correlation(a,b){const n=Math.min(a.length,b.length);if(n<3)return 0;const ma=a.reduce((s,v)=>s+v,0)/n,mb=b.reduce((s,v)=>s+v,0)/n;let num=0,da=0,db=0;for(let i=0;i<n;i++){num+=(a[i]-ma)*(b[i]-mb);da+=(a[i]-ma)**2;db+=(b[i]-mb)**2}return da&&db?num/Math.sqrt(da*db):0}
+function formatPeriod(ms){const m=ms/60000;if(m<90)return m.toFixed(0)+' min';const h=m/60;if(h<48)return h.toFixed(1)+' hr';return (h/24).toFixed(1)+' days'}
+
+function buildFlow(lines) {
+  const map = {};
+  for (const l of lines) {
+    const key = `${l.sourceName || 'log'}|${l.severity}|${l.component || 'unknown'}`;
+    map[key] = (map[key] || 0) + 1;
+  }
+  return Object.entries(map).map(([key,count]) => { const [source,sev,component]=key.split('|'); return {source,sev,component,count}; }).sort((a,b)=>b.count-a.count).slice(0,12);
+}
+
+function buildFlame(lines) {
+  const map = {};
+  for (const l of lines) if (l.latencyMs !== null) map[l.component || 'unknown'] = (map[l.component || 'unknown'] || 0) + l.latencyMs;
+  return Object.entries(map).map(([component,total])=>({component,total})).sort((a,b)=>b.total-a.total).slice(0,12);
+}
+
+function buildComparison(lines, sources) {
+  if (sources.length !== 2) return null;
+  const bySource = sources.map(s => lines.filter(l => l.sourceId === s.id));
+  const maps = bySource.map(group => group.reduce((m,l)=>{m[l.template]=(m[l.template]||0)+1;return m;},{}));
+  const keys = new Set([...Object.keys(maps[0]),...Object.keys(maps[1])]);
+  const changes = [];
+  for (const key of keys) {
+    const a = maps[0][key] || 0, b = maps[1][key] || 0;
+    if (a !== b) changes.push({pattern:key,before:a,after:b,delta:b-a,type:a===0?'added':b===0?'removed':'changed'});
+  }
+  return {left:sources[0].name,right:sources[1].name,changes:changes.sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta)).slice(0,20)};
+}
+
+function compileQuery(text) {
+  const raw = (text || '').trim();
+  if (!raw) return null;
+  const tests = []; let term = raw; let natural = false;
+  if (/\berrors?\b|\bfail(?:ed|ure)?\b/i.test(raw)) { tests.push(l => l.severity === 'error' || l.severity === 'fatal'); natural = true; }
+  if (/\bwarnings?\b/i.test(raw)) { tests.push(l => l.severity === 'warn'); natural = true; }
+  const minMatch = raw.match(/last\s+(\d+)\s*(minute|minutes|hour|hours|day|days)/i);
+  if (minMatch && S.buckets.length) {
+    const unit = minMatch[2].toLowerCase()[0], mult = unit === 'h' ? 3600000 : unit === 'd' ? 86400000 : 60000;
+    const maxT = S.buckets[S.buckets.length - 1].end.getTime(), cutoff = maxT - (+minMatch[1] * mult);
+    tests.push(l => l.ts && l.ts.getTime() >= cutoff); natural = true;
+  }
+  const matchTerm = raw.match(/\bmatching\s+(.+)$/i);
+  if (matchTerm) { term = matchTerm[1].trim(); natural = true; }
+  const tokens = raw.match(/(?:[^\s"]+|"[^"]*")+/g) || [];
+  for (const token of tokens) {
+    const m = token.match(/^([a-z_.-]+)(>=|<=|=|:|>|<|~)(.+)$/i);
+    if (!m) continue;
+    natural = true; term = '';
+    const key = m[1].toLowerCase(), op = m[2], val = m[3].replace(/^"|"$/g,'');
+    tests.push(l => testFieldQuery(l,key,op,val));
+  }
+  if (!natural) return null;
+  if (term && !matchTerm && tokens.some(t=>/[=:<>~]/.test(t))) term = tokens.filter(t=>!/[=:<>~]/.test(t)).join(' ');
+  return {term:term === raw && natural ? '' : term, tests};
+}
+
+function testFieldQuery(l,key,op,val) {
+  const field = key === 'level' || key === 'severity' ? l.severity : key === 'source' ? l.sourceName : key === 'component' ? l.component : key === 'request' ? l.requestId : key === 'status' ? l.status : key === 'duration' || key === 'latency' ? l.latencyMs : l.fields?.[key];
+  if (field === undefined || field === null) return false;
+  if (op === '~') return String(field).toLowerCase().includes(val.toLowerCase());
+  if (['>','<','>=','<='].includes(op)) {
+    const lhs = Number(field), rhs = parseDurationValue(val);
+    if (isNaN(lhs) || isNaN(rhs)) return false;
+    if (op === '>') return lhs > rhs; if (op === '<') return lhs < rhs; if (op === '>=') return lhs >= rhs; return lhs <= rhs;
+  }
+  return String(field).toLowerCase() === val.toLowerCase();
+}
+function parseDurationValue(v){const m=String(v).match(/^([0-9.]+)(ms|s|m)?$/i);if(!m)return Number(v);const n=+m[1],u=(m[2]||'').toLowerCase();return u==='s'?n*1000:u==='m'?n*60000:n}
+
+function applyFilters() {
+  let searchRe = null;
+  S.queryPlan = compileQuery(S.search);
+  try { if (S.search && !S.queryPlan) searchRe = new RegExp(S.search, 'i'); } catch {}
+  const brushStart = S.brush ? S.buckets[S.brush.startIdx]?.start.getTime() : null;
+  const brushEnd = S.brush ? S.buckets[S.brush.endIdx]?.end.getTime() : null;
+  S.filteredLines = S.parsedLines.filter(l => {
+    if (!S.sevFilter[l.severity]) return false;
+    if (S.sourceFilter[l.sourceId] === false) return false;
+    if (S.incidentMode && !(l.severity === 'fatal' || l.severity === 'error' || l.severity === 'warn' || l.isAnomaly || l.status >= 500 || (l.latencyMs !== null && S.latency && l.latencyMs >= S.latency.p95))) return false;
+    if (S.queryPlan) {
+      if (S.queryPlan.tests.some(fn => !fn(l))) return false;
+      if (S.queryPlan.term && !l.raw.toLowerCase().includes(S.queryPlan.term.toLowerCase())) return false;
+    } else if (S.search) {
+      if (searchRe ? !searchRe.test(l.raw) : !l.raw.toLowerCase().includes(S.search.toLowerCase())) return false;
+    }
+    if (brushStart !== null && l.ts) { const t = l.ts.getTime(); if (t < brushStart || t > brushEnd) return false; }
+    return true;
+  });
+  S.displayLines = S.filteredLines;
+}
+
+function renderLogViewer() {
+  const viewer = document.getElementById('logViewer');
+  const lines = S.displayLines;
+  const scrollTop = viewer.scrollTop;
+  const viewH = viewer.clientHeight;
+  const startIdx = Math.max(0, Math.floor(scrollTop / LINE_H) - 10);
+  const endIdx = Math.min(lines.length, Math.ceil((scrollTop + viewH) / LINE_H) + 10);
+  let html = `<div style="height:${startIdx * LINE_H}px"></div>`;
+  for (let i = startIdx; i < endIdx; i++) {
+    const l = lines[i], isBookmarked = S.bookmarks.has(l.index);
+    html += `<div class="log-line severity-${l.severity}${l.isChild ? ' multiline-child' : ''}${l.isAnomaly ? ' anomaly' : ''}${isBookmarked ? ' bookmarked' : ''}" data-idx="${l.index}" style="height:${LINE_H}px">`;
+    html += `<span class="bookmark-btn" onclick="event.stopPropagation();toggleBookmark(${l.index})">&#9733;</span>`;
+    html += `<span class="ln">${S.sources.length > 1 ? (l.sourceLine + 1) : (l.index + 1)}</span>`;
+    html += `<span class="ts">${fmtTs(l.ts)}</span>`;
+    html += `<span class="sev">${l.severity === 'other' ? '-' : l.severity}</span>`;
+    if (S.sources.length > 1) html += `<span class="line-source" title="${esc(l.sourceName)}">${esc(l.sourceName)}</span>`;
+    if (l.structured) {
+      const st = l.structured, sc = st.status >= 500 ? 'status-5xx' : st.status >= 400 ? 'status-4xx' : st.status >= 300 ? 'status-3xx' : 'status-2xx';
+      html += `<span class="fields"><span class="field-tag">${esc(st.method)}</span><span class="field-tag ${sc}">${st.status}</span><span class="field-tag">${esc(st.ip)}</span></span>`;
+      html += `<span class="msg">${hlSearch(st.url || l.message, S.queryPlan?.term || S.search)}</span>`;
+    } else {
+      const badges = [];
+      if (l.requestId) badges.push(`<span class="pill">req ${esc(l.requestId.substring(0,12))}</span>`);
+      if (l.latencyMs !== null) badges.push(`<span class="pill">${formatMs(l.latencyMs)}</span>`);
+      if (l.status) badges.push(`<span class="pill">${l.status}</span>`);
+      html += badges.length ? `<span class="line-badges">${badges.join('')}</span>` : '';
+      html += `<span class="msg">${hlSearch(l.message, S.queryPlan?.term || S.search)}</span>`;
+    }
+    html += `</div>`;
+  }
+  html += `<div style="height:${Math.max(0, (lines.length - endIdx) * LINE_H)}px"></div>`;
+  viewer.innerHTML = html;
+}
+
+function formatMs(ms) { return ms >= 60000 ? (ms/60000).toFixed(1)+'m' : ms >= 1000 ? (ms/1000).toFixed(2)+'s' : Math.round(ms)+'ms'; }
+
+function renderAll() {
+  applyFilters();
+  renderLogViewer();
+  renderTimeline();
+  renderRightPanel();
+  renderSevButtons();
+  renderSourceButtons();
+  renderStatsMini();
+  renderPlayhead();
+  setTimeout(renderMinimap, 50);
+}
+
+function renderSourceButtons() {
+  const el = document.getElementById('sourceFilters');
+  if (!el) return;
+  if (S.sources.length <= 1) { el.innerHTML = ''; return; }
+  el.innerHTML = S.sources.map(src => `<button class="src-btn ${S.sourceFilter[src.id] === false ? 'off' : 'active'}" onclick="toggleSource(${src.id})" title="${esc(src.name)}">${esc(src.name)}</button>`).join('');
+}
+
+function toggleSource(id) {
+  S.sourceFilter[id] = S.sourceFilter[id] === false;
+  applyFilters(); renderLogViewer(); renderSourceButtons(); renderStatsMini(); renderMinimap();
+}
+
+function toggleSev(sev) { S.sevFilter[sev] = !S.sevFilter[sev]; applyFilters(); renderLogViewer(); renderSevButtons(); renderStatsMini(); renderMinimap(); }
+function toggleIncidentMode() { S.incidentMode = !S.incidentMode; document.getElementById('incidentBtn').classList.toggle('active', S.incidentMode); renderAll(); showToast(S.incidentMode ? 'Incident mode on' : 'Incident mode off', 'success'); }
+function escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;')}
+function setSearch(q){document.getElementById('searchInput').value=q;S.search=q;renderAll()}
+
+function renderRightPanel() {
+  const panel = document.getElementById('panelRight'), s = S.stats;
+  let html = '';
+  html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--accent)"></div>Overview</div><div class="stats-grid">
+    <div class="stat-card"><div class="label">Total Lines</div><div class="value">${s.total.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="label">Timestamped</div><div class="value">${s.withTs.toLocaleString()}</div><div class="sub">${s.total>0?((s.withTs/s.total)*100).toFixed(0):0}% parsed</div></div>
+    <div class="stat-card"><div class="label">Timespan</div><div class="value">${s.timespan||'-'}</div></div>
+    <div class="stat-card"><div class="label">Lines/sec</div><div class="value">${s.lps}</div></div>
+    <div class="stat-card"><div class="label">Error Rate</div><div class="value" style="color:${parseFloat(s.errorRate)>5?'var(--red)':'var(--text)'}">${s.errorRate}%</div><div class="sparkline">${buildSparkline(S.buckets.map(b=>b.error+b.fatal),'var(--red)')}</div></div>
+    <div class="stat-card"><div class="label">Format</div><div class="value" style="font-size:11px">${esc(S.format || 'Mixed')}</div></div>
+  </div></div>`;
+  html += renderSeveritySection(s);
+  html += renderSourceSection();
+  html += renderComparisonSection();
+  html += renderLatencySection();
+  html += renderStatusMixSection();
+  html += renderHotPatternsSection();
+  html += renderRequestsSection();
+  html += renderGenealogySection();
+  html += renderCalendarSection();
+  html += renderSeasonalitySection();
+  html += renderFlowSection();
+  html += renderFlameSection();
+  html += renderExistingSignalSections();
+  html += renderWorkflowSection();
+  html += renderIncidentSection();
+  panel.innerHTML = html;
+}
+
+function renderSeveritySection(s) {
+  const totalSev = Object.values(s.sevCounts).reduce((a,b)=>a+b,0) || 1;
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--orange)"></div>Severity</div><div class="sev-bar">`;
+  for (const sev of ['fatal','error','warn','info','debug','other']) { const pct = (s.sevCounts[sev] / totalSev) * 100; if (pct > 0) html += `<div style="width:${pct}%;background:${SEVCOLORS[sev]}"></div>`; }
+  html += `</div><div class="sev-list">`;
+  for (const sev of ['fatal','error','warn','info','debug','other']) if (s.sevCounts[sev] > 0) html += `<div class="sev-item"><div class="dot" style="background:${SEVCOLORS[sev]}"></div><div class="name">${sev}</div><div class="count">${s.sevCounts[sev].toLocaleString()}</div><div class="pct">${((s.sevCounts[sev]/totalSev)*100).toFixed(1)}%</div></div>`;
+  return html + `</div></div>`;
+}
+
+function renderSourceSection() {
+  if (S.sources.length <= 1) return '';
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--accent)"></div>Sources</div><div class="metric-list">`;
+  for (const src of S.sources) html += `<div class="metric-item"><strong>${esc(src.name)}</strong><div class="meta">${(S.stats.sourceCounts[src.name] || 0).toLocaleString()} lines | ${esc(src.format || 'Generic')}</div></div>`;
+  return html + `</div></div>`;
+}
+
+function renderComparisonSection() {
+  if (!S.comparison) return '';
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--purple)"></div>File Comparison</div><div class="pattern-list">`;
+  for (const c of S.comparison.changes.slice(0,8)) html += `<div class="pattern-item"><strong>${esc(c.type)} ${c.delta>0?'+':''}${c.delta}</strong><div class="meta">${esc(c.pattern)}<br>${esc(S.comparison.left)}: ${c.before} | ${esc(S.comparison.right)}: ${c.after}</div></div>`;
+  return html + `</div></div>`;
+}
+
+function renderLatencySection() {
+  if (!S.latency) return '';
+  return `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--yellow)"></div>Latency</div><div class="stats-grid">
+    <div class="stat-card"><div class="label">Samples</div><div class="value">${S.latency.count.toLocaleString()}</div></div>
+    <div class="stat-card"><div class="label">p50</div><div class="value">${formatMs(S.latency.p50)}</div></div>
+    <div class="stat-card"><div class="label">p95</div><div class="value">${formatMs(S.latency.p95)}</div></div>
+    <div class="stat-card"><div class="label">p99</div><div class="value">${formatMs(S.latency.p99)}</div></div>
+  </div></div>`;
+}
+
+function renderStatusMixSection() {
+  if (!S.statusMix.length) return '';
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--blue)"></div>HTTP Status Mix</div><div class="stacked-bars">`;
+  for (const b of S.statusMix) {
+    const total = b.total || 1;
+    html += `<div class="stacked-bar" title="${fmtTs(b.start)} ${b.total} responses">`;
+    for (const [key,color] of [['s5','var(--red)'],['s4','var(--orange)'],['s3','var(--blue)'],['s2','var(--accent)']]) if (b[key]) html += `<div class="stacked-seg" style="height:${Math.max(1,(b[key]/total)*42)}px;background:${color}"></div>`;
+    html += `</div>`;
+  }
+  return html + `</div></div>`;
+}
+
+function renderHotPatternsSection() {
+  if (!S.hotPatterns.length) return '';
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--red)"></div>Hot Patterns</div><div class="pattern-list">`;
+  for (const p of S.hotPatterns.slice(0,8)) html += `<div class="pattern-item" onclick="setSearch('${escAttr(p.pattern.substring(0,50))}')"><strong>${p.recent.toLocaleString()} recent | ${esc(p.drift)}</strong><div class="meta">${esc(p.pattern)}</div></div>`;
+  return html + `</div></div>`;
+}
+
+function renderRequestsSection() {
+  if (!S.requestGroups.length) return '';
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--cyan)"></div>Request Lifecycles</div><div class="request-list">`;
+  for (const r of S.requestGroups.slice(0,8)) html += `<div class="request-item" onclick="setSearch('request=${escAttr(r.id)}')"><strong>${esc(r.id.substring(0,24))}</strong><div class="meta">${r.count} events | ${r.errors} errors | ${formatPeriod(r.duration || 0)}${r.maxLatency?` | max ${formatMs(r.maxLatency)}`:''}<br>${esc(r.components.slice(0,3).join(', '))}</div></div>`;
+  return html + `</div></div>`;
+}
+
+function renderGenealogySection() {
+  if (!S.genealogies.length) return '';
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--red)"></div>Error Genealogy</div><div class="pattern-list">`;
+  for (const g of S.genealogies.slice(0,6)) html += `<div class="pattern-item"><strong>${g.count} related errors</strong><div class="meta">${esc(g.key.substring(0,180))}<br>${esc(g.components.slice(0,4).join(', '))}</div></div>`;
+  return html + `</div></div>`;
+}
+
+function renderCalendarSection() {
+  const withTs = S.parsedLines.filter(l=>l.ts);
+  if (withTs.length < 2) return '';
+  const byDay = {};
+  for (const l of withTs) { const k = l.ts.toISOString().slice(0,10); byDay[k] = (byDay[k] || 0) + 1; }
+  const days = Object.keys(byDay).sort().slice(-98), max = Math.max(1,...Object.values(byDay));
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--accent)"></div>Heatmap Calendar</div><div class="calendar-grid">`;
+  for (const d of days) { const int = byDay[d]/max; html += `<div class="calendar-cell" title="${d}: ${byDay[d]}" style="background:rgba(0,212,170,${Math.max(.08,int)})"></div>`; }
+  return html + `</div></div>`;
+}
+
+function renderSeasonalitySection() {
+  if (!S.seasonality.length) return '';
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--purple)"></div>Seasonality</div><div class="season-list">`;
+  for (const s of S.seasonality) html += `<div class="season-item"><strong>${esc(s.period)}</strong><div class="meta">autocorrelation r=${s.r.toFixed(2)}</div></div>`;
+  return html + `</div></div>`;
+}
+
+function renderFlowSection() {
+  if (!S.flow.length) return '';
+  const max = Math.max(1,...S.flow.map(f=>f.count));
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--blue)"></div>Source Flow</div>`;
+  for (const f of S.flow.slice(0,8)) html += `<div class="flow-row"><span>${esc(f.source.substring(0,14))}</span><span>></span><span>${esc(f.sev)}</span><span>></span><span>${esc(f.component.substring(0,14))}</span><div class="flow-val" style="grid-column:1 / -1;width:${(f.count/max)*100}%"></div></div>`;
+  return html + `</div>`;
+}
+
+function renderFlameSection() {
+  if (!S.flame.length) return '';
+  const max = Math.max(1,...S.flame.map(f=>f.total));
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--orange)"></div>Latency Flame</div>`;
+  for (const f of S.flame.slice(0,8)) html += `<div class="flame-row"><span style="width:88px;overflow:hidden;text-overflow:ellipsis">${esc(f.component)}</span><div class="bar" style="width:${Math.max(4,(f.total/max)*170)}px"></div><span>${formatMs(f.total)}</span></div>`;
+  return html + `</div>`;
+}
+
+function renderExistingSignalSections() {
+  let html = '';
+  if (S.rateChanges.length) { html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--orange)"></div>Error Rate Spikes <span style="color:var(--orange);font-weight:600;margin-left:auto">${S.rateChanges.length}</span></div><div class="rate-change-list">`; for (const r of S.rateChanges) html += `<div class="rate-item" onclick="scrollToTime('${r.bucket.start.toISOString()}')"><div class="time">${fmtTs(r.bucket.start)}</div><div class="detail">Error rate: ${r.rateBefore}/bucket to ${r.rateAfter}/bucket (${r.multiplier}x)</div></div>`; html += `</div></div>`; }
+  if (S.anomalies.length) { html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--red)"></div>Anomaly Spikes <span style="color:var(--red);font-weight:600;margin-left:auto">${S.anomalies.length}</span></div><div class="anomaly-list">`; for (const a of S.anomalies) html += `<div class="anomaly-item" onclick="scrollToTime('${a.bucket.start.toISOString()}')"><div class="time">${fmtTs(a.bucket.start)}</div><div class="detail">${a.bucket.total} events | ${a.magnitude}</div></div>`; html += `</div></div>`; }
+  if (S.correlations.length) { html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--cyan)"></div>Correlations</div><div class="correlation-list">`; for (const c of S.correlations) html += `<div class="correlation-item"><div class="pair">${c.a.toUpperCase()} - ${c.b.toUpperCase()}</div><div class="score">r=${c.r} (${c.strength}${+c.r > 0 ? ' positive' : ' negative'})</div></div>`; html += `</div></div>`; }
+  if (S.clusters.length) { html += `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--red)"></div>Error Clusters <span style="color:var(--red);font-weight:600;margin-left:auto">${S.clusters.length}</span></div><div class="cluster-list">`; for (const c of S.clusters) { const normSafe = esc(c.normalized.substring(0,60)).replace(/'/g,"\\'"); html += `<div class="cluster-item" onclick="filterByCluster('${normSafe}')"><div class="pattern">${esc(c.pattern)}</div><div class="meta"><span class="count-badge">${c.count}x</span>${c.first?`<span>${fmtTs(c.first).substring(5,16)}</span>`:''}${c.last&&c.first!==c.last?`<span>to ${fmtTs(c.last).substring(5,16)}</span>`:''}</div></div>`; } html += `</div></div>`; }
+  return html;
+}
+
+function renderWorkflowSection() {
+  let html = `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--accent)"></div>Workflow</div>
+    <input class="inline-input" id="noteInput" placeholder="Timeline note / deploy / incident marker">
+    <div class="inline-actions"><button class="tool-btn" onclick="addAnnotationFromInput()">Add Note</button><button class="tool-btn" onclick="exportNotebookJson()">Notebook JSON</button></div>`;
+  if (S.annotations.length) { html += `<div class="note-list" style="margin-top:8px">`; for (const n of S.annotations.slice(-6).reverse()) html += `<div class="note-item"><strong>${esc(n.label)}</strong><div class="meta">${fmtTs(new Date(n.time))} | ${esc(n.file || 'session')}</div></div>`; html += `</div>`; }
+  if (S.savedQueries.length) { html += `<div class="saved-list" style="margin-top:8px">`; for (const q of S.savedQueries.slice(-6).reverse()) html += `<div class="saved-item"><strong onclick="applySavedQuery('${escAttr(q.id)}')">${esc(q.name)}</strong><div class="meta">${esc(q.search || 'no search')}<br><button class="tool-btn" onclick="applySavedQuery('${escAttr(q.id)}')">Apply</button> <button class="tool-btn" onclick="deleteSavedQuery('${escAttr(q.id)}')">Delete</button></div></div>`; html += `</div>`; }
+  return html + `</div>`;
+}
+
+function renderIncidentSection() {
+  if (!S.incidentMode && !S.anomalies.length && !S.rateChanges.length && !S.hotPatterns.length) return '';
+  return `<div class="rpanel-section"><div class="section-title"><div class="dot" style="background:var(--red)"></div>Incident Draft</div>
+    <div class="metric-list"><div class="metric-item"><strong>${S.stats.errorRate}% error rate, ${S.anomalies.length} anomaly spikes</strong><div class="meta">${incidentDraftText().split('\n').slice(0,6).map(esc).join('<br>')}</div></div></div>
+    <input class="inline-input" id="llamaEndpoint" placeholder="Optional LlamaLink endpoint" value="${esc(localStorage.getItem(STORE_KEYS.llama) || '')}">
+    <div class="inline-actions"><button class="tool-btn" onclick="summarizeWithLlamaLink()">Summarize</button></div></div>`;
+}
+
+function initLocalState() {
+  try { S.savedQueries = JSON.parse(localStorage.getItem(STORE_KEYS.queries) || '[]'); } catch { S.savedQueries = []; }
+  try { S.annotations = JSON.parse(localStorage.getItem(STORE_KEYS.notes) || '[]'); } catch { S.annotations = []; }
+  try { S.customFormat = JSON.parse(localStorage.getItem(STORE_KEYS.custom) || 'null'); } catch { S.customFormat = null; }
+}
+initLocalState();
+
+function saveCurrentQuery() {
+  const name = S.search || 'Current filter';
+  const entry = {id:String(Date.now()),name,search:S.search,sevFilter:{...S.sevFilter},sourceFilter:{...S.sourceFilter},brush:S.brush,incidentMode:S.incidentMode};
+  S.savedQueries.push(entry); localStorage.setItem(STORE_KEYS.queries, JSON.stringify(S.savedQueries)); renderRightPanel(); showToast('Saved query', 'success');
+}
+function applySavedQuery(id) {
+  const q = S.savedQueries.find(x=>x.id===id); if (!q) return;
+  S.search=q.search||''; S.sevFilter={...S.sevFilter,...q.sevFilter}; S.sourceFilter={...S.sourceFilter,...q.sourceFilter}; S.brush=q.brush||null; S.incidentMode=!!q.incidentMode;
+  document.getElementById('searchInput').value=S.search; document.getElementById('incidentBtn').classList.toggle('active', S.incidentMode); renderAll(); showToast('Applied query','success');
+}
+function deleteSavedQuery(id) { S.savedQueries = S.savedQueries.filter(q=>q.id!==id); localStorage.setItem(STORE_KEYS.queries, JSON.stringify(S.savedQueries)); renderRightPanel(); }
+
+function addAnnotationFromInput() {
+  const input = document.getElementById('noteInput'); if (!input || !input.value.trim()) { showToast('Add note text first','error'); return; }
+  const time = S.brush ? S.buckets[S.brush.startIdx]?.start?.getTime() : (S.displayLines.find(l=>l.ts)?.ts?.getTime() || Date.now());
+  S.annotations.push({id:String(Date.now()),label:input.value.trim(),time,file:S.fileName});
+  localStorage.setItem(STORE_KEYS.notes, JSON.stringify(S.annotations)); input.value=''; renderAll(); showToast('Annotation saved','success');
+}
+
+function togglePlayback() {
+  if (!S.buckets.length) return;
+  S.playback.active = !S.playback.active; document.getElementById('playBtn').classList.toggle('active', S.playback.active);
+  if (!S.playback.active) { clearInterval(S.playback.timer); S.playback.timer = null; renderPlayhead(); return; }
+  S.playback.idx = S.brush?.startIdx || 0;
+  S.playback.timer = setInterval(() => {
+    if (S.playback.idx >= S.buckets.length) { togglePlayback(); return; }
+    S.brush = {startIdx:S.playback.idx,endIdx:Math.min(S.buckets.length-1,S.playback.idx+2)};
+    S.playback.idx += 3; renderAll();
+  }, 650);
+}
+function renderPlayhead() {
+  const el = document.getElementById('playhead'); if (!el) return;
+  if (!S.playback.active || !S.buckets.length) { el.style.display='none'; return; }
+  const wrap = document.getElementById('timelineCanvas').getBoundingClientRect();
+  el.style.display='block'; el.style.left = (16 + (S.playback.idx / S.buckets.length) * wrap.width) + 'px';
+}
+
+function openFormatBuilder() {
+  document.getElementById('formatModal').style.display='flex';
+  document.getElementById('customFormatName').value=S.customFormat?.name||'';
+  document.getElementById('customFormatRegex').value=S.customFormat?.regex||'';
+  testCustomFormat();
+}
+function closeFormatBuilder(){document.getElementById('formatModal').style.display='none'}
+function testCustomFormat() {
+  const regex=document.getElementById('customFormatRegex').value, sample=document.getElementById('customFormatSample').value, out=document.getElementById('customFormatResult');
+  try { const m=sample.match(new RegExp(regex)); out.textContent=m ? JSON.stringify(m.groups || Array.from(m), null, 2) : 'No match'; } catch(e) { out.textContent='Invalid regex: '+e.message; }
+}
+function saveCustomFormat() {
+  S.customFormat={name:document.getElementById('customFormatName').value.trim()||'Custom Format',regex:document.getElementById('customFormatRegex').value.trim()};
+  localStorage.setItem(STORE_KEYS.custom, JSON.stringify(S.customFormat)); closeFormatBuilder(); showToast('Custom format saved','success');
+}
+function clearCustomFormat(){S.customFormat=null;localStorage.removeItem(STORE_KEYS.custom);testCustomFormat();showToast('Custom format cleared','success')}
+
+function incidentDraftText() {
+  const lines = [];
+  lines.push(`Incident summary for ${S.fileName || 'current logs'}`);
+  lines.push(`Showing ${S.displayLines.length} of ${S.parsedLines.length} parsed lines across ${S.sources.length || 1} source(s).`);
+  lines.push(`Error rate ${S.stats.errorRate}%; anomalies ${S.anomalies.length}; rate spikes ${S.rateChanges.length}.`);
+  if (S.hotPatterns[0]) lines.push(`Top hot pattern: ${S.hotPatterns[0].pattern} (${S.hotPatterns[0].drift}).`);
+  if (S.requestGroups[0]) lines.push(`Highest-risk request: ${S.requestGroups[0].id} with ${S.requestGroups[0].errors} errors.`);
+  if (S.latency) lines.push(`Latency p95 ${formatMs(S.latency.p95)}, p99 ${formatMs(S.latency.p99)}.`);
+  return lines.join('\n');
+}
+
+function exportMarkdownReport() {
+  const sample = S.displayLines.slice(0,50).map(l=>`- ${fmtTs(l.ts)} [${l.severity}] ${l.sourceName?`(${l.sourceName}) `:''}${l.message}`).join('\n');
+  const notes = S.annotations.map(n=>`- ${fmtTs(new Date(n.time))}: ${n.label}`).join('\n') || '- None';
+  const md = `# LogLens Report\n\n${incidentDraftText()}\n\n## Active Filters\n\n- Search: ${S.search || 'none'}\n- Incident mode: ${S.incidentMode ? 'on' : 'off'}\n\n## Notes\n\n${notes}\n\n## Sample Events\n\n${sample || '- No events'}\n`;
+  downloadText(md, (S.fileName || 'loglens').replace(/\.[^.]+$/,'') + '_report.md');
+  showToast('Markdown report exported','success');
+}
+
+function exportSnapshot() {
+  const data = {fileName:S.fileName,created:new Date().toISOString(),stats:S.stats,annotations:S.annotations,lines:S.displayLines.map(l=>({time:fmtTs(l.ts),severity:l.severity,source:l.sourceName,message:l.message,status:l.status,latencyMs:l.latencyMs})).slice(0,5000)};
+  const html = `<!doctype html><meta charset="utf-8"><title>LogLens Snapshot</title><body style="font-family:system-ui;background:#0d0f17;color:#d6deff"><h1>LogLens Snapshot</h1><pre id="data"></pre><script>document.getElementById('data').textContent=${JSON.stringify(JSON.stringify(data,null,2))};<\/script></body>`;
+  downloadText(html, (S.fileName || 'loglens').replace(/\.[^.]+$/,'') + '_snapshot.html');
+  showToast('Snapshot exported','success');
+}
+
+function exportNotebookJson() {
+  const payload = {tool:'LogLens',file:S.fileName,created:new Date().toISOString(),bookmarks:S.parsedLines.filter(l=>S.bookmarks.has(l.index)),annotations:S.annotations,stats:S.stats,incidentDraft:incidentDraftText()};
+  downloadText(JSON.stringify(payload,null,2), (S.fileName || 'loglens') + '_notebook.json');
+}
+
+async function summarizeWithLlamaLink() {
+  const input = document.getElementById('llamaEndpoint'), endpoint = input?.value.trim();
+  if (!endpoint) { showToast('Set an endpoint first','error'); return; }
+  localStorage.setItem(STORE_KEYS.llama, endpoint);
+  try {
+    const res = await fetch(endpoint, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:incidentDraftText()})});
+    const text = await res.text();
+    downloadText(text, (S.fileName || 'loglens') + '_summary.txt');
+    showToast('Summary downloaded','success');
+  } catch(e) { showToast('Summary failed: '+e.message,'error'); }
+}
+
+// FILE LOADING
+// ═══════════════════════════════════════════
+async function processFile(file) { return processFiles([file], 'auto'); }
+
+async function processFiles(fileList, mode = 'auto') {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  const loadBar = document.getElementById('loadingBar');
+  loadBar.style.display = 'block'; loadBar.style.width = '8%';
+  try {
+    const prepared = [];
+    for (const file of files) prepared.push(...await expandInputFile(file));
+    loadBar.style.width = '42%';
+    const appendTarget = mode === 'auto' ? findAppendTarget(prepared) : null;
+    if (appendTarget) await appendPreparedSource(prepared[0], appendTarget);
+    else await replacePreparedSources(prepared);
+    loadBar.style.width = '90%';
+    showLoadedUi();
+    renderAll();
     loadBar.style.width = '100%';
     setTimeout(() => { loadBar.style.display = 'none'; loadBar.style.width = '0'; }, 300);
+  } catch (e) {
+    loadBar.style.display = 'none';
+    showToast('Load failed: ' + e.message, 'error');
+    console.error(e);
+  }
+}
 
-    renderAll();
-    window.addEventListener('resize', () => { renderTimeline(); renderMinimap(); });
-  };
-  reader.readAsText(file);
+async function replacePreparedSources(prepared) {
+  S.bookmarks = new Set(); S.brush = null; S.search = ''; S.incidentMode = false;
+  document.getElementById('searchInput').value = '';
+  document.getElementById('incidentBtn').classList.remove('active');
+  document.getElementById('brushInfo').style.display = 'none';
+  S.sources = prepared.map((p, i) => ({id:i,name:p.name,size:p.size,text:p.text,format:null,lineCount:0,lineOffset:0}));
+  S.sourceFilter = Object.fromEntries(S.sources.map(s => [s.id, true]));
+  const parsed = await parseSourcesAsync(S.sources, 0);
+  S.sources = parsed.sources;
+  S.parsedLines = parsed.lines;
+  S.rawLines = parsed.rawLines;
+  S.fileName = S.sources.map(s=>s.name).join(', ');
+  S.fileSize = S.sources.reduce((sum,s)=>sum+(s.size||0),0);
+  S.format = [...new Set(S.sources.map(s=>s.format))].join(' + ');
+  groupMultilines(S.parsedLines);
+  runAnalysis();
+}
+
+async function appendPreparedSource(prepared, target) {
+  const deltaText = prepared.text.slice(target.text.length).replace(/^\r?\n/, '');
+  if (!deltaText.trim()) { showToast('No new lines to append', 'success'); return; }
+  const source = {...target,text:deltaText,lineOffset:target.lineCount};
+  const parsed = await parseSourcesAsync([source], S.parsedLines.length);
+  target.text = prepared.text;
+  target.size = prepared.size;
+  target.lineCount += parsed.sources[0]?.lineCount || 0;
+  target.format = parsed.sources[0]?.format || target.format;
+  S.parsedLines.push(...parsed.lines);
+  S.rawLines.push(...parsed.rawLines);
+  groupMultilines(S.parsedLines);
+  runAnalysis();
+  showToast('Appended ' + parsed.lines.length.toLocaleString() + ' lines', 'success');
+}
+
+function findAppendTarget(prepared) {
+  if (prepared.length !== 1 || !S.sources.length) return null;
+  const incoming = prepared[0];
+  const target = S.sources.find(s => s.name === incoming.name);
+  if (!target || !target.text || incoming.text.length <= target.text.length) return null;
+  return incoming.text.startsWith(target.text) ? target : null;
+}
+
+async function expandInputFile(file) {
+  const lower = file.name.toLowerCase();
+  if (lower.endsWith('.zip')) return extractZipEntries(await file.arrayBuffer(), file.name);
+  if (lower.endsWith('.tar.gz') || lower.endsWith('.tgz')) return extractTarEntries(await ungzipBuffer(await file.arrayBuffer()), file.name);
+  if (lower.endsWith('.gz')) {
+    const buf = await ungzipBuffer(await file.arrayBuffer());
+    return [{name:file.name.replace(/\.gz$/i,''),size:buf.byteLength,text:new TextDecoder().decode(buf)}];
+  }
+  return [{name:file.name,size:file.size,text:await file.text()}];
+}
+
+async function ungzipBuffer(buffer) {
+  if (!('DecompressionStream' in window)) throw new Error('This browser cannot decompress gzip files');
+  const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return await new Response(stream).arrayBuffer();
+}
+
+async function inflateRawBuffer(buffer) {
+  if (!('DecompressionStream' in window)) throw new Error('This browser cannot decompress zip deflate entries');
+  try {
+    const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return await new Response(stream).arrayBuffer();
+  } catch {
+    const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream('deflate'));
+    return await new Response(stream).arrayBuffer();
+  }
+}
+
+async function extractZipEntries(buffer, archiveName) {
+  const view = new DataView(buffer);
+  const eocd = findZipEocd(view);
+  if (eocd < 0) throw new Error('Invalid zip archive');
+  const total = view.getUint16(eocd + 10, true), cdOffset = view.getUint32(eocd + 16, true);
+  let ptr = cdOffset;
+  const out = [];
+  for (let i = 0; i < total; i++) {
+    if (view.getUint32(ptr, true) !== 0x02014b50) break;
+    const method = view.getUint16(ptr + 10, true);
+    const compSize = view.getUint32(ptr + 20, true);
+    const nameLen = view.getUint16(ptr + 28, true), extraLen = view.getUint16(ptr + 30, true), commentLen = view.getUint16(ptr + 32, true);
+    const localOffset = view.getUint32(ptr + 42, true);
+    const name = new TextDecoder().decode(new Uint8Array(buffer, ptr + 46, nameLen));
+    ptr += 46 + nameLen + extraLen + commentLen;
+    if (/\/$/.test(name) || !isTextLike(name)) continue;
+    const localNameLen = view.getUint16(localOffset + 26, true), localExtraLen = view.getUint16(localOffset + 28, true);
+    const dataStart = localOffset + 30 + localNameLen + localExtraLen;
+    const comp = buffer.slice(dataStart, dataStart + compSize);
+    const data = method === 0 ? comp : method === 8 ? await inflateRawBuffer(comp) : null;
+    if (!data) continue;
+    out.push({name:name.split('/').pop() || name,size:data.byteLength,text:new TextDecoder().decode(data),archive:archiveName});
+  }
+  if (!out.length) throw new Error('No text logs found in zip');
+  return out;
+}
+
+function findZipEocd(view) {
+  for (let i = view.byteLength - 22; i >= Math.max(0, view.byteLength - 66000); i--) if (view.getUint32(i, true) === 0x06054b50) return i;
+  return -1;
+}
+
+function extractTarEntries(buffer, archiveName) {
+  const bytes = new Uint8Array(buffer), dec = new TextDecoder(), out = [];
+  for (let off = 0; off + 512 <= bytes.length;) {
+    const name = dec.decode(bytes.slice(off, off + 100)).replace(/\0.*$/,'');
+    if (!name) break;
+    const sizeOct = dec.decode(bytes.slice(off + 124, off + 136)).replace(/\0.*$/,'').trim();
+    const size = parseInt(sizeOct || '0', 8);
+    const dataStart = off + 512, dataEnd = dataStart + size;
+    if (size > 0 && isTextLike(name)) out.push({name:name.split('/').pop() || name,size,text:dec.decode(bytes.slice(dataStart, dataEnd)),archive:archiveName});
+    off = dataStart + Math.ceil(size / 512) * 512;
+  }
+  if (!out.length) throw new Error('No text logs found in tar.gz');
+  return out;
+}
+
+function isTextLike(name) { return /\.(log|txt|csv|json|tsv|out|err|trace|conf)$/i.test(name) || !/\.[a-z0-9]{2,5}$/i.test(name); }
+
+async function parseSourcesAsync(sources, startIndex) {
+  if (!window.Worker) return parseSourcesOnMain(sources, startIndex);
+  try {
+    const worker = new Worker(URL.createObjectURL(new Blob([parserWorkerSource()], {type:'text/javascript'})));
+    return await new Promise((resolve, reject) => {
+      worker.onmessage = e => { worker.terminate(); resolve(hydrateParsedResult(e.data)); };
+      worker.onerror = e => { worker.terminate(); reject(new Error(e.message || 'Worker parse failed')); };
+      worker.postMessage({sources:sources.map(s=>({id:s.id,name:s.name,size:s.size,text:s.text,lineOffset:s.lineOffset||0})),custom:S.customFormat,startIndex});
+    });
+  } catch (e) {
+    console.warn('Worker parse fallback', e);
+    return parseSourcesOnMain(sources, startIndex);
+  }
+}
+
+function parseSourcesOnMain(sources, startIndex) {
+  const lines = [], rawLines = [], outSources = [];
+  let idx = startIndex;
+  for (const src of sources) {
+    const raw = src.text.split(/\r?\n/);
+    const format = detectFormat(raw);
+    const source = {...src,format,lineCount:raw.length};
+    outSources.push(source);
+    rawLines.push(...raw);
+    for (let i = 0; i < raw.length; i++) {
+      const parsed = parseLine(raw[i], idx, format, source, i + (src.lineOffset || 0));
+      if (parsed) { lines.push(parsed); idx++; }
+    }
+  }
+  return {lines,rawLines,sources:outSources};
+}
+
+function hydrateParsedResult(result) {
+  for (const l of result.lines) if (l.ts) l.ts = new Date(l.ts);
+  return result;
+}
+
+function parserWorkerSource() {
+  return `
+const SEV_PAT=[{level:'fatal',re:/\\b(FATAL|CRITICAL|CRIT|EMERG|EMERGENCY|PANIC)\\b/i},{level:'error',re:/\\b(ERROR|ERR|SEVERE|FAILURE|FAILED|ALERT)\\b/i},{level:'warn',re:/\\b(WARN|WARNING|CAUTION)\\b/i},{level:'info',re:/\\b(INFO|INFORMATION|NOTICE|NOTE)\\b/i},{level:'debug',re:/\\b(DEBUG|TRACE|VERBOSE|FINE|FINER|FINEST)\\b/i}];
+function parseSev(line){for(const s of SEV_PAT)if(s.re.test(line))return s.level;return'other'}
+function parseTs(line){let m=line.match(/(\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:?\\d{2})?)/);if(m)return valid(new Date(m[1]));m=line.match(/(\\d{2}\\/\\w{3}\\/\\d{4}:\\d{2}:\\d{2}:\\d{2}\\s[+-]\\d{4})/);if(m){const p=m[1].match(/(\\d{2})\\/(\\w{3})\\/(\\d{4}):(\\d{2}):(\\d{2}):(\\d{2})/),mo={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};return p?valid(new Date(Date.UTC(+p[3],mo[p[2]]||0,+p[1],+p[4],+p[5],+p[6]))):null}m=line.match(/(\\w{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2})/);if(m){const p=m[1].match(/(\\w{3})\\s+(\\d{1,2})\\s+(\\d{2}):(\\d{2}):(\\d{2})/),mo={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};const d=new Date();if(p){d.setMonth(mo[p[1]]||0);d.setDate(+p[2]);d.setHours(+p[3],+p[4],+p[5],0);return d.getTime()}}m=line.match(/(\\d{2}\\/\\d{2}\\/\\d{4}\\s+\\d{2}:\\d{2}:\\d{2})/);if(m)return valid(new Date(m[1].replace(/(\\d{2})\\/(\\d{2})\\/(\\d{4})/,'$3-$1-$2')));m=line.match(/\\b(1[4-9]\\d{8})\\b/);if(m)return +m[1]*1000;m=line.match(/\\b(1[4-9]\\d{11})\\b/);if(m)return +m[1];return null}
+function valid(d){return d&&!isNaN(d.getTime())?d.getTime():null}
+function detectFormat(lines,custom){const sample=lines.filter(l=>l&&l.trim()).slice(0,50);if(custom&&custom.regex){try{const r=new RegExp(custom.regex);if(sample.some(l=>r.test(l)))return custom.name||'Custom Format'}catch{}}const js=sample.filter(l=>l.trim().startsWith('{')).map(l=>{try{return JSON.parse(l)}catch{return null}}).filter(Boolean);if(js.some(o=>o.timeUnixNano||o.severityText))return'OpenTelemetry Logs';if(js.some(o=>o.__REALTIME_TIMESTAMP||o._SYSTEMD_UNIT||o.PRIORITY!==undefined))return'Systemd Journal';if(js.some(o=>o['@timestamp']&&o['@message']||o.logStream))return'CloudWatch Logs';if(sample.filter(l=>/^\\d{4}-\\d{2}-\\d{2}T\\S+\\s+(stdout|stderr)\\s+[FP]\\s+/.test(l)).length>=2)return'Kubernetes CRI';if(sample.filter(l=>/^\\d{4}-\\d{2}-\\d{2}T\\S+\\s+(stdout|stderr)\\s+/.test(l)||/^\\d{4}-\\d{2}-\\d{2}T\\S+\\s+\\{.*"log"/.test(l)).length>=2)return'Docker Logs';if(sample.filter(l=>/^\\d{4}\\/\\d{2}\\/\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\s+\\[(error|warn|notice|info|debug|crit|alert|emerg)\\]/i.test(l)).length>=2)return'Nginx Error Log';if(js.length&&js.length>=Math.min(2,sample.length))return'JSON Lines';if(sample.some(l=>l.startsWith('#Fields:')))return'IIS W3C';if(sample.filter(l=>/^\\S+\\s+\\S+\\s+\\S+\\s+\\[/.test(l)).length>=3)return'Apache Combined';if(sample.filter(l=>/^\\w{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2}/.test(l)).length>=3)return'Syslog';if(sample.filter(l=>/\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}/.test(l)).length>=3)return'ISO Timestamped';return'Generic'}
+function parseJson(line){try{const o=JSON.parse(line),f=flat(o),raw=o.timeUnixNano||o.observedTimeUnixNano||o.timestamp||o['@timestamp']||o.time||o.TimeGenerated||o.__REALTIME_TIMESTAMP,ts=parseJsonTs(raw),sev=sevVal(o.severityText||o.severity||o.level||o.priority||o.PRIORITY||o.Level),msg=String(val(o.body)||o.message||o.msg||o['@message']||o.textPayload||o.MESSAGE||line);return{ts,severity:sev,message:msg,fields:f}}catch{return null}}
+function parseJsonTs(raw){if(raw==null||raw==='')return null;if(typeof raw==='number'){if(raw>1e15)return raw/1e6;if(raw>1e12)return raw;if(raw>1e9)return raw*1000}const s=String(raw);if(/^\\d{16,}$/.test(s))return Number(s)/1000;if(/^\\d{13}$/.test(s))return Number(s);if(/^\\d{10}$/.test(s))return Number(s)*1000;return valid(new Date(s))}
+function val(v){if(v&&typeof v==='object')return v.stringValue||v.intValue||v.doubleValue||v.boolValue||JSON.stringify(v);return v}
+function flat(o,p='',out={}){for(const k in o||{}){const v=o[k],key=p?p+'.'+k:k;if(v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length<25)flat(v,key,out);else out[key]=val(v)}return out}
+function sevVal(v){if(v==null)return'other';if(typeof v==='number'){if(v<=2)return'fatal';if(v===3)return'error';if(v===4)return'warn';if(v<=6)return'info';return'debug'}return parseSev(String(v))}
+function latency(text,f){for(const k of ['durationMs','duration_ms','latency_ms','elapsed_ms'])if(f[k]&&!isNaN(+f[k]))return +f[k];const m=text.match(/\\b(?:took|duration|elapsed|latency|time|query_time)[=:\\s]+([0-9]+(?:\\.[0-9]+)?)\\s*(ms|s|sec|m)\\b/i)||text.match(/\\b([0-9]+(?:\\.[0-9]+)?)\\s*ms\\b/i);if(!m)return null;const n=+m[1],u=(m[2]||'ms').toLowerCase();return u[0]==='s'?n*1000:u[0]==='m'&&u!=='ms'?n*60000:n}
+function requestId(text,f){for(const k in f)if(/request|trace|correlation|span/i.test(k)&&String(f[k]).length>=6)return String(f[k]);const m=text.match(/\\b(?:trace[-_ ]?id|request[-_ ]?id|req[-_ ]?id|correlation[-_ ]?id|x-correlation-id|span[-_ ]?id)[=: ]+["']?([A-Za-z0-9_.:-]{6,})/i);return m?m[1]:null}
+function comp(text,f,src){for(const k of ['service.name','service_name','service','app','component','logger','container_name','pod_name','_SYSTEMD_UNIT','Category'])if(f[k])return String(f[k]).substring(0,40);const b=text.match(/\\[([A-Za-z][\\w.-]{2,40})\\]/);if(b)return b[1];const p=text.match(/\\b([A-Za-z][\\w.-]{2,40})(?:\\[\\d+\\])?:/);return p?p[1]:(src||'unknown')}
+function norm(msg){return String(msg||'').replace(/\\b\\d{1,3}(?:\\.\\d{1,3}){3}\\b/g,'IP').replace(/[0-9a-f]{12,}/gi,'HASH').replace(/0x[0-9a-f]+/gi,'0xN').replace(/[A-Fa-f0-9-]{32,}/g,'ID').replace(/\\b\\d+(?:\\.\\d+)?\\b/g,'N').replace(/\\/[^\s"']+/g,'/PATH').replace(/"[^"]*"/g,'"S"').replace(/'[^']*'/g,"'S'").replace(/\\s+/g,' ').trim().substring(0,160)}
+function parseLineW(line,index,format,source,sourceLine,custom){if(!line.trim())return null;let ts=null,severity='other',message=line,fields={},structured=null;if(custom&&custom.regex){try{const m=line.match(new RegExp(custom.regex));if(m){const g=m.groups||{};fields=g;message=String(g.message||g.msg||g.text||line);ts=parseTs(g.ts||g.timestamp||line);severity=sevVal(g.level||g.severity||line)}}catch{}}if(!ts&&/JSON|Systemd|OpenTelemetry|CloudWatch|Stackdriver|Azure/.test(format)){const j=parseJson(line);if(j){ts=j.ts;severity=j.severity;message=j.message;fields=j.fields}}else if(format==='Docker Logs'||format==='Kubernetes CRI'){let m=line.match(/^(\\d{4}-\\d{2}-\\d{2}T\\S+)\\s+(stdout|stderr)\\s+[FP]\\s+(.*)$/)||line.match(/^(\\d{4}-\\d{2}-\\d{2}T\\S+)\\s+(.*)$/);if(m){ts=valid(new Date(m[1]));message=m[3]||m[2]||'';severity=parseSev(message);fields={stream:m[2]||'stdout'}}}else if(format==='Nginx Error Log'){const m=line.match(/^(\\d{4}\\/\\d{2}\\/\\d{2}\\s+\\d{2}:\\d{2}:\\d{2})\\s+\\[(\\w+)\\]\\s+\\d+#\\d+:\\s*(.*)$/i);if(m){ts=parseTs(m[1]);severity=sevVal(m[2]);message=m[3];fields={component:'nginx',level:m[2]}}}if(!ts){ts=parseTs(line);severity=parseSev(line)}const text=line+' '+message+' '+Object.values(fields).join(' ');let status=null;const sm=line.match(/"\\w+\\s+\\S+\\s+HTTP\\/\\d(?:\\.\\d)?"\\s+(\\d{3})\\s+(\\d+)/);if(sm){status=+sm[1];structured={method:(line.match(/"(\\w+)\\s+/)||[])[1]||'',url:(line.match(/"\\w+\\s+(\\S+)/)||[])[1]||'',status,ip:(line.match(/^(\\S+)/)||[])[1]||''}}if(!status){const st=text.match(/\\b(?:status|status_code|http_status|sc-status)[=:\\s]+([1-5]\\d{2})\\b/i);if(st)status=+st[1]}return{index,raw:line,ts,severity,message,fields,structured,isAnomaly:false,isChild:false,parentIdx:null,sourceId:source.id,sourceName:source.name,sourceLine,component:comp(text,fields,source.name),requestId:requestId(text,fields),latencyMs:latency(text,fields),status,template:norm(message||line)}}
+self.onmessage=e=>{const{sources,custom,startIndex}=e.data;const outSources=[],lines=[],rawLines=[];let idx=startIndex;for(const src of sources){const raw=src.text.split(/\\r?\\n/),format=detectFormat(raw,custom),source={...src,format,lineCount:raw.length};outSources.push(source);rawLines.push(...raw);for(let i=0;i<raw.length;i++){const p=parseLineW(raw[i],idx,format,source,i+(src.lineOffset||0),custom);if(p){lines.push(p);idx++}}}postMessage({sources:outSources,lines,rawLines})};
+`;
+}
+
+function showLoadedUi() {
+  document.getElementById('dropContainer').style.display = 'none';
+  document.getElementById('mainView').style.display = 'flex';
+  document.getElementById('headerSubtitle').style.display = 'none';
+  document.getElementById('headerActions').style.display = 'flex';
+  const fileInfo = document.getElementById('fileInfo');
+  fileInfo.style.display = 'flex';
+  const sizeStr = S.fileSize > 1048576 ? (S.fileSize / 1048576).toFixed(1) + ' MB' : (S.fileSize / 1024).toFixed(1) + ' KB';
+  fileInfo.innerHTML = `<span class="tag">${esc(S.sources.length > 1 ? S.sources.length + ' files' : S.fileName)}</span><span class="tag">${sizeStr}</span><span class="tag">${S.parsedLines.length.toLocaleString()} lines</span><span class="format-badge">${esc(S.format)}</span>`;
+}
+
+async function toggleLiveTail() {
+  if (S.live.enabled) {
+    clearInterval(S.live.timer);
+    S.live = {enabled:false,handle:null,timer:null,lastText:'',sourceName:''};
+    showToast('Live tail stopped', 'success');
+    return;
+  }
+  if (!window.showOpenFilePicker) { showToast('Live watch needs File System Access API', 'error'); return; }
+  try {
+    const [handle] = await window.showOpenFilePicker({multiple:false});
+    const file = await handle.getFile();
+    const text = await file.text();
+    await processFiles([file], 'replace');
+    S.live = {enabled:true,handle,timer:null,lastText:text,sourceName:file.name};
+    S.live.timer = setInterval(pollLiveTail, 2000);
+    showToast('Live tail started', 'success');
+  } catch (e) {
+    if (e.name !== 'AbortError') showToast('Live tail failed: ' + e.message, 'error');
+  }
+}
+
+async function pollLiveTail() {
+  if (!S.live.enabled || !S.live.handle) return;
+  try {
+    const file = await S.live.handle.getFile();
+    const text = await file.text();
+    if (text.length > S.live.lastText.length && text.startsWith(S.live.lastText)) {
+      const target = S.sources.find(s => s.name === S.live.sourceName);
+      if (target) await appendPreparedSource({name:file.name,size:file.size,text}, target);
+      S.live.lastText = text;
+      showLoadedUi(); renderAll();
+    } else if (text.length < S.live.lastText.length) {
+      S.live.lastText = text;
+      await processFiles([file], 'replace');
+      showToast('Live file rotated; reloaded', 'success');
+    }
+  } catch (e) {
+    showToast('Live tail paused: ' + e.message, 'error');
+    clearInterval(S.live.timer);
+    S.live.enabled = false;
+  }
 }
 
 // Drag & drop
 const dropzone = document.getElementById('dropzone');
 dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
 dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]); });
-document.getElementById('fileInput').addEventListener('change', e => { if (e.target.files.length > 0) processFile(e.target.files[0]); });
+dropzone.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) processFiles(e.dataTransfer.files, 'auto'); });
+document.getElementById('fileInput').addEventListener('change', e => { if (e.target.files.length > 0) processFiles(e.target.files, 'auto'); });
 document.addEventListener('dragover', e => e.preventDefault());
-document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]); });
+document.addEventListener('drop', e => { e.preventDefault(); if (e.dataTransfer.files.length > 0) processFiles(e.dataTransfer.files, 'auto'); });
+window.addEventListener('resize', () => { renderTimeline(); renderMinimap(); });
 </script>
 </body>
 </html>

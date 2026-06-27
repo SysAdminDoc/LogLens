@@ -1,6 +1,7 @@
 *.bak
 .env
 *.log
+dist/
 CLAUDE.md
 
 # Markdown files local-only (except README)
